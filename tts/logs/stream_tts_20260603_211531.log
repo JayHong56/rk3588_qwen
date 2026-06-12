@@ -1,0 +1,95 @@
+[INFO] starting MeloTTS-RKNN2 service...
+[INFO] log: /home/linaro/Qwen/tts/logs/melotts_tts.log
+[INFO] waiting for MeloTTS-RKNN2: http://127.0.0.1:8010/health
+[OK] MeloTTS-RKNN2 ready
+[INFO] running voice chat...
+[PROMPT] <image>请用三句话描述这张图片，每句话不超过20个字。
+助手：[2026-06-03 21:15:33][QWEN] backend=cmd
+[2026-06-03 21:15:33][QWEN-CMD] start subprocess
+[2026-06-03 21:15:33][QWEN-CMD] cmd=/home/linaro/Qwen/run_qwen3vl_stream.sh <image>请用三句话描述这张图片，每句话不超过20个字。
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-STREAM-WRAPPER] start
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-STREAM-WRAPPER] user_prompt=<image>请用三句话描述这张图片，每句话不超过20个字。
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-STREAM-WRAPPER] send_prompt=<image>请用三句话描述这张图片，每句话不超过20个字。
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-STREAM-WRAPPER] raw stdout log=/home/linaro/Qwen/tts/logs/qwen3vl_stream_20260603_211533.raw_stdout.log
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-STREAM-WRAPPER] clean stream log=/home/linaro/Qwen/tts/logs/qwen3vl_stream_20260603_211533.clean_stream.log
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-STREAM-WRAPPER] launch demo
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-STREAM-WRAPPER] cmd=timeout 600 stdbuf -oL -eL ./demo /home/linaro/test.jpg ./qwen3-vl_vision_rk3588.rknn ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm 256 4096 3 <|vision_start|> <|vision_end|> <|image_pad|>
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-FILTER] stream filter started
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-DEMO-OUT] W rkllm: Warning: Your rknpu driver version is too low, please upgrade to 0.9.7
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-DEMO-OUT] I rkllm: rkllm-runtime version: 1.2.3, rknpu driver version: 0.9.6, platform: RK3588
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-DEMO-OUT] I rkllm: loading rkllm model from ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm
+[2026-06-03 21:15:33][QWEN-STDERR] [2026-06-03 21:15:33][QWEN-DEMO-OUT] I rkllm: rkllm-toolkit version: 1.2.3, max_context_limit: 4096, npu_core_num: 3, target_platform: RK3588, model_dtype: W8A8
+[2026-06-03 21:15:37][QWEN-STDERR] [2026-06-03 21:15:37][QWEN-DEMO-OUT] I rkllm: Enabled cpus: [4, 5, 6, 7]
+[2026-06-03 21:15:37][QWEN-STDERR] [2026-06-03 21:15:37][QWEN-DEMO-OUT] I rkllm: Enabled cpus num: 4
+[2026-06-03 21:15:37][QWEN-STDERR] [2026-06-03 21:15:37][QWEN-DEMO-OUT] I rkllm: Using mrope
+[2026-06-03 21:15:37][QWEN-STDERR] [2026-06-03 21:15:37][QWEN-DEMO-OUT] rkllm init success
+[2026-06-03 21:15:37][QWEN-STDERR] [2026-06-03 21:15:37][QWEN-DEMO-OUT] main: LLM Model loaded in  4640.42 ms
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] ===the core num is 3===
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] model input num: 1, output num: 4
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] input tensors:
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] index=0, name=pixel, n_dims=4, dims=[1, 448, 448, 3], n_elems=602112, size=1204224, fmt=NHWC, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] output tensors:
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] index=0, name=4820, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] index=1, name=1669, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] index=2, name=2720, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] index=3, name=3771, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] model input height=448, width=448, channel=3
+[2026-06-03 21:15:38][QWEN-STDERR] [2026-06-03 21:15:38][QWEN-DEMO-OUT] main: ImgEnc Model loaded in   887.30 ms
+[2026-06-03 21:15:41][QWEN-STDERR] [2026-06-03 21:15:41][QWEN-DEMO-OUT] main: ImgEnc Model inference took  2224.10 ms
+[2026-06-03 21:15:41][QWEN-STDERR] [2026-06-03 21:15:41][QWEN-DEMO-OUT] **********************可输入以下问题对应序号获取回答/或自定义输入********************
+[2026-06-03 21:15:41][QWEN-STDERR] [2026-06-03 21:15:41][QWEN-FILTER] answer stream started
+[2026-06-03 21:15:41][QWEN-STDERR] [2026-06-03 21:15:41][QWEN-DEMO-OUT] [0] <image>What is in the image?
+[2026-06-03 21:15:41][QWEN-STDERR] [2026-06-03 21:15:41][QWEN-DEMO-OUT] [1] <image>这张图片中有什么？
+[2026-06-03 21:15:41][QWEN-STDERR] [2026-06-03 21:15:41][QWEN-DEMO-OUT] *************************************************************************
+[2026-06-03 21:15:43][QWEN-WATCHDOG] qwen still running, elapsed=10s, pid=2378453
+[2026-06-03 21:15:45][QWEN-STDERR] [2026-06-03 21:15:45][QWEN-DEMO-OUT] user: robot: 清晨田野，电线横跨天际。
+[2026-06-03 21:15:45][QWEN-CMD] first stdout received after 12.25s
+[2026-06-03 21:15:45][QWEN-CMD] received stdout chars=1
+[2026-06-03 21:15:45][QWEN-STREAM] first token after 12.249s
+清晨田野，电线横跨天际。[2026-06-03 21:15:45][STREAM] enqueue sentence idx=1, chars=12
+
+[2026-06-03 21:15:45][TTS-WORKER] start idx=1, chars=12
+[2026-06-03 21:15:45][TTS-WORKER] text=清晨田野，电线横跨天际。
+[2026-06-03 21:15:45][TTS] POST http://127.0.0.1:8010/speak, chars=12, play=True, split=False
+[2026-06-03 21:15:45][TTS] text=清晨田野，电线横跨天际。
+[2026-06-03 21:15:47][QWEN-STDERR] [2026-06-03 21:15:47][QWEN-DEMO-OUT] 远处灯光点点，晨雾弥漫。
+远处灯光点点，晨雾弥漫。[2026-06-03 21:15:47][STREAM] enqueue sentence idx=2, chars=12
+
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] 东三I线标识，静谧乡村景。
+东[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+三I线标识，静谧乡村景。[2026-06-03 21:15:49][STREAM] enqueue sentence idx=3, chars=13
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm:  Model init time (ms)  3767.55
+
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm:  Stage         Total Time (ms)  Tokens    Time per Token (ms)      Tokens per Second
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm:  Prefill       2812.56          222       12.67                    78.93
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm:  Generate      5326.60          29        183.68                   5.44
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm:  Peak Memory Usage (GB)
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm:  5.44
+[2026-06-03 21:15:49][QWEN-STDERR] [2026-06-03 21:15:49][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:15:51][QWEN-STDERR] [2026-06-03 21:15:51][QWEN-DEMO-OUT] user:
+[2026-06-03 21:15:51][QWEN-STDERR] [2026-06-03 21:15:51][QWEN-FILTER] stream filter finished
+[2026-06-03 21:15:51][QWEN-STDERR] [2026-06-03 21:15:51][QWEN-STREAM-WRAPPER] pipeline status: input=0 demo=0 filter=0
+[2026-06-03 21:15:51][QWEN-STDERR] [2026-06-03 21:15:51][QWEN-STREAM-WRAPPER] done
+[2026-06-03 21:15:51][QWEN-CMD] subprocess finished code=0, elapsed=18.30s, chars=40
+
+[2026-06-03 21:15:51][QWEN-STREAM] qwen stream finished, elapsed=18.304s, sentences=3
+[2026-06-03 21:15:51][STREAM] waiting TTS queue drain...
+[2026-06-03 21:15:56][TTS] response status=200, elapsed=11.09s
+[2026-06-03 21:15:56][TTS-WORKER] done idx=1, elapsed=11.088s, resp={'ok': True, 'count': 1, 'wavs': ['/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780492545479.wav']}
+[2026-06-03 21:15:56][TTS-WORKER] start idx=2, chars=12
+[2026-06-03 21:15:56][TTS-WORKER] text=远处灯光点点，晨雾弥漫。
+[2026-06-03 21:15:56][TTS] POST http://127.0.0.1:8010/speak, chars=12, play=True, split=False
+[2026-06-03 21:15:56][TTS] text=远处灯光点点，晨雾弥漫。
+[2026-06-03 21:16:06][TTS] response status=200, elapsed=9.61s
+[2026-06-03 21:16:06][TTS-WORKER] done idx=2, elapsed=9.611s, resp={'ok': True, 'count': 1, 'wavs': ['/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780492556552.wav']}
+[2026-06-03 21:16:06][TTS-WORKER] start idx=3, chars=13
+[2026-06-03 21:16:06][TTS-WORKER] text=东三I线标识，静谧乡村景。
+[2026-06-03 21:16:06][TTS] POST http://127.0.0.1:8010/speak, chars=13, play=True, split=False
+[2026-06-03 21:16:06][TTS] text=东三I线标识，静谧乡村景。
+[2026-06-03 21:16:15][TTS] response status=200, elapsed=9.53s
+[2026-06-03 21:16:15][TTS-WORKER] done idx=3, elapsed=9.532s, resp={'ok': True, 'count': 1, 'wavs': ['/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780492566163.wav']}
+[2026-06-03 21:16:15][TTS-WORKER] stop
+[2026-06-03 21:16:15][STREAM] all TTS done

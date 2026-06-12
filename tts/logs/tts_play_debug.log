@@ -1,0 +1,62 @@
+
+========== 2026-06-03 22:26:16 ==========
+[PLAY-DEBUG] wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496775239.wav
+[PLAY-DEBUG] user=linaro
+[PLAY-DEBUG] PULSE_SERVER=
+[PLAY-DEBUG] DISPLAY=:0
+[PLAY-DEBUG] XDG_RUNTIME_DIR=/run/user/1000
+-rw-r--r-- 1 linaro linaro 336K  6月  3 22:26 /home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496775239.wav
+[PLAY-DEBUG] pactl info:
+服务器字串：unix:/tmp/pulse-socket
+程序库协议版本：34
+服务器协议版本：34
+是否本地服务器：是
+客户端索引：60
+区块大小: 65472
+用户名：linaro
+主机名：linaro-alip
+服务器名：pulseaudio
+服务器版本：14.2
+默认采样规格：s16le 2ch 44100Hz
+默认声道映射：front-left,front-right
+默认音频入口：alsa_output.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo
+默认信源： alsa_input.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo
+Cookie：aacd:8c81
+[PLAY-DEBUG] sinks:
+0	alsa_output.platform-bp9001-sound.stereo-fallback	module-alsa-card.c	s16le 2ch 44100Hz	SUSPENDED
+1	alsa_output.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo	module-alsa-card.c	s16le 2ch 48000Hz	IDLE
+[PLAY-DEBUG] default sink:
+未指定有效的命令。
+[PLAY-DEBUG] try paplay...
+[PLAY-DEBUG] paplay rc=0
+
+========== 2026-06-03 22:27:39 ==========
+[PLAY-DEBUG] wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496840190.wav
+[PLAY-DEBUG] user=linaro
+[PLAY-DEBUG] PULSE_SERVER=
+[PLAY-DEBUG] DISPLAY=:0
+[PLAY-DEBUG] XDG_RUNTIME_DIR=/run/user/1000
+-rw-r--r-- 1 linaro linaro 336K  6月  3 22:27 /home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496840190.wav
+[PLAY-DEBUG] pactl info:
+服务器字串：unix:/tmp/pulse-socket
+程序库协议版本：34
+服务器协议版本：34
+是否本地服务器：是
+客户端索引：63
+区块大小: 65472
+用户名：linaro
+主机名：linaro-alip
+服务器名：pulseaudio
+服务器版本：14.2
+默认采样规格：s16le 2ch 44100Hz
+默认声道映射：front-left,front-right
+默认音频入口：alsa_output.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo
+默认信源： alsa_input.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo
+Cookie：aacd:8c81
+[PLAY-DEBUG] sinks:
+0	alsa_output.platform-bp9001-sound.stereo-fallback	module-alsa-card.c	s16le 2ch 44100Hz	SUSPENDED
+1	alsa_output.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo	module-alsa-card.c	s16le 2ch 48000Hz	IDLE
+[PLAY-DEBUG] default sink:
+未指定有效的命令。
+[PLAY-DEBUG] try paplay...
+[PLAY-DEBUG] paplay rc=0

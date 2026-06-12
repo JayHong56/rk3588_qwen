@@ -1,0 +1,50 @@
+[2026-06-03 20:30:07][QWEN-WRAPPER] start
+[2026-06-03 20:30:07][QWEN-WRAPPER] prompt=请描述这张图片。
+[2026-06-03 20:30:07][QWEN-WRAPPER] raw stdout log=/home/linaro/Qwen/tts/logs/qwen3vl_20260603_203007.raw_stdout.log
+[2026-06-03 20:30:07][QWEN-WRAPPER] stderr log=/home/linaro/Qwen/tts/logs/qwen3vl_20260603_203007.stderr.log
+[2026-06-03 20:30:07][QWEN-WRAPPER] clean answer log=/home/linaro/Qwen/tts/logs/qwen3vl_20260603_203007.clean_answer.log
+[2026-06-03 20:30:07][QWEN-WRAPPER] cwd=/home/linaro/rkllm_qwen3vl4b/demo_Linux_aarch64
+[2026-06-03 20:30:07][QWEN-WRAPPER] LD_LIBRARY_PATH=/home/linaro/rkllm_qwen3vl4b/demo_Linux_aarch64/lib:
+[2026-06-03 20:30:07][QWEN-WRAPPER] check files
+-rwxr-xr-x 1 linaro linaro 6.6M  6月  2 19:08 ./demo
+-rw-r--r-- 1 linaro linaro 1.3M  6月  3 14:34 /home/linaro/test.jpg
+-rw-r--r-- 1 linaro linaro 4.6G  6月  2 19:11 ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm
+-rw-r--r-- 1 linaro linaro 829M  6月  2 19:11 ./qwen3-vl_vision_rk3588.rknn
+[2026-06-03 20:30:07][QWEN-WRAPPER] launch demo
+[2026-06-03 20:30:07][QWEN-WRAPPER] cmd=timeout 600 stdbuf -oL -eL ./demo /home/linaro/test.jpg ./qwen3-vl_vision_rk3588.rknn ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm 256 4096 3 <|vision_start|> <|vision_end|> <|image_pad|>
+[2026-06-03 20:30:07][QWEN-DEMO-OUT] W rkllm: Warning: Your rknpu driver version is too low, please upgrade to 0.9.7
+[2026-06-03 20:30:07][QWEN-DEMO-OUT] I rkllm: rkllm-runtime version: 1.2.3, rknpu driver version: 0.9.6, platform: RK3588
+[2026-06-03 20:30:07][QWEN-DEMO-OUT] I rkllm: loading rkllm model from ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm
+[2026-06-03 20:30:08][QWEN-DEMO-OUT] I rkllm: rkllm-toolkit version: 1.2.3, max_context_limit: 4096, npu_core_num: 3, target_platform: RK3588, model_dtype: W8A8
+[2026-06-03 20:30:11][QWEN-DEMO-OUT] I rkllm: Enabled cpus: [4, 5, 6, 7]
+[2026-06-03 20:30:11][QWEN-DEMO-OUT] I rkllm: Enabled cpus num: 4
+[2026-06-03 20:30:11][QWEN-DEMO-OUT] I rkllm: Using mrope
+[2026-06-03 20:30:11][QWEN-DEMO-OUT] rkllm init success
+[2026-06-03 20:30:11][QWEN-DEMO-OUT] main: LLM Model loaded in  4007.24 ms
+[2026-06-03 20:30:12][QWEN-DEMO-OUT] ===the core num is 3===
+[2026-06-03 20:30:12][QWEN-DEMO-OUT] model input num: 1, output num: 4
+[2026-06-03 20:30:12][QWEN-DEMO-OUT] input tensors:
+[2026-06-03 20:30:12][QWEN-DEMO-OUT]   index=0, name=pixel, n_dims=4, dims=[1, 448, 448, 3], n_elems=602112, size=1204224, fmt=NHWC, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:30:12][QWEN-DEMO-OUT] output tensors:
+[2026-06-03 20:30:12][QWEN-DEMO-OUT]   index=0, name=4820, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:30:12][QWEN-DEMO-OUT]   index=1, name=1669, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:30:12][QWEN-DEMO-OUT]   index=2, name=2720, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:30:12][QWEN-DEMO-OUT]   index=3, name=3771, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:30:12][QWEN-DEMO-OUT] model input height=448, width=448, channel=3
+[2026-06-03 20:30:12][QWEN-DEMO-OUT] main: ImgEnc Model loaded in   723.49 ms
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] main: ImgEnc Model inference took  2234.34 ms
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] 
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] **********************可输入以下问题对应序号获取回答/或自定义输入********************
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] 
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] [0] <image>What is in the image?
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] [1] <image>这张图片中有什么？
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] 
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] *************************************************************************
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] 
+[2026-06-03 20:30:14][QWEN-DEMO-OUT] 
+[2026-06-03 20:30:18][QWEN-DEMO-OUT] user: robot: 我目前无法直接查看或分析图片，因此无法对您提到的“这张图片”进行具体描述。
+[2026-06-03 20:30:18][QWEN-DEMO-OUT] 
+[2026-06-03 20:30:22][QWEN-DEMO-OUT] 不过，如果您能提供以下信息之一，我可以帮助您更准确地描述它：
+[2026-06-03 20:30:22][QWEN-DEMO-OUT] 
+[2026-06-03 20:30:27][QWEN-DEMO-OUT] 1. **图片内容的文字描述**（例如：这是一个人在海边奔跑、一只猫坐在窗台上等）；
+[2026-06-03 20:30:31][QWEN-DEMO-OUT] 2. **场景或主题**（如风景、人物肖像、建筑、动物、抽象画等）；

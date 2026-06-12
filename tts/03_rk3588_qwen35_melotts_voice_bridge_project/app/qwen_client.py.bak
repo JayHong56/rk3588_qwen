@@ -1,0 +1,53 @@
+import json, os, shlex, subprocess
+import httpx
+
+class QwenClient:
+    def __init__(self):
+        self.backend = os.getenv("QWEN_BACKEND","openai").lower()
+        self.base = os.getenv("QWEN_API_BASE","http://127.0.0.1:8000/v1").rstrip("/")
+        self.key = os.getenv("QWEN_API_KEY","EMPTY")
+        self.model = os.getenv("QWEN_MODEL","qwen3.5-2b")
+        self.temperature = float(os.getenv("QWEN_TEMPERATURE","0.7"))
+        self.max_tokens = int(os.getenv("QWEN_MAX_TOKENS","512"))
+        self.cmd = os.getenv("QWEN_CMD","")
+
+    def stream_chat(self, prompt: str, system: str = "你是一个简洁、可靠的中文语音助手。"):
+        if self.backend == "cmd":
+            yield from self._cmd_chat(prompt)
+        else:
+            yield from self._openai_chat(prompt, system)
+
+    def _cmd_chat(self, prompt: str):
+        if not self.cmd:
+            raise RuntimeError("QWEN_BACKEND=cmd 但 QWEN_CMD 未配置")
+        proc = subprocess.Popen(shlex.split(self.cmd) + [prompt], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            yield line
+        code = proc.wait()
+        if code != 0:
+            raise RuntimeError(proc.stderr.read() if proc.stderr else f"Qwen command failed: {code}")
+
+    def _openai_chat(self, prompt: str, system: str):
+        payload = {
+            "model": self.model,
+            "messages": [{"role":"system","content":system},{"role":"user","content":prompt}],
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+            "stream": True,
+        }
+        headers = {"Authorization": f"Bearer {self.key}", "Content-Type": "application/json"}
+        with httpx.Client(timeout=None) as client:
+            with client.stream("POST", self.base + "/chat/completions", headers=headers, json=payload) as resp:
+                resp.raise_for_status()
+                for line in resp.iter_lines():
+                    if not line: continue
+                    data = line[len("data:"):].strip() if line.startswith("data:") else line.strip()
+                    if data == "[DONE]": break
+                    try:
+                        obj = json.loads(data)
+                    except Exception:
+                        continue
+                    content = obj.get("choices",[{}])[0].get("delta",{}).get("content") or ""
+                    if content:
+                        yield content

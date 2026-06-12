@@ -1,0 +1,102 @@
+I:        Started server process [26940]
+I:        Waiting for application startup.
+I:        Application startup complete.
+I:        Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
+I:        127.0.0.1:37286 - "GET /health HTTP/1.1" 200 OK
+I:        127.0.0.1:37294 - "GET /health HTTP/1.1" 200 OK
+[TTS-API] /synthesize request
+[TTS-API] raw_text=清晨五点，天空灰暗，电线横跨画面。
+[TTS-API] play=True, split=False, out_wav=None
+[TTS-API] normalized_text=清晨五点，天空灰暗，电线横跨画面。
+[TTS-API] parts=1
+[TTS-API] backend=persistent
+[TTS-API] MELOTTS_DIR=/home/linaro/Qwen/tts/MeloTTS-RKNN2
+[TTS-API] PYTHON_BIN=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/.venv/bin/python
+[TTS-API] AUDIO_PLAYER=/home/linaro/Qwen/tts/play_tts_debug.sh
+W rknn-toolkit-lite2 version: 2.3.2
+W Query dynamic range failed. Ret code: RKNN_ERR_MODEL_INVALID. (If it is a static shape RKNN model, please ignore the above warning message.)
+[PersistentMeloTTS] loaded in 4.208s
+[TTS-API] synth part 1/1: 清晨五点，天空灰暗，电线横跨画面。
+[PersistentMeloTTS] synth chars=17 sentences=1 encoder=0.040s decoder=0.883s total=0.997s wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496775239.wav
+[TTS-API] synth done wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496775239.wav, elapsed=0.997s
+[TTS-API] play wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496775239.wav, player=/home/linaro/Qwen/tts/play_tts_debug.sh, device=plughw:4,0, wait=False
+[TTS-API] play started
+I:        127.0.0.1:50784 - "POST /speak HTTP/1.1" 200 OK
+
+========== 2026-06-03 22:26:16 ==========
+[PLAY-DEBUG] wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496775239.wav
+[PLAY-DEBUG] user=linaro
+[PLAY-DEBUG] PULSE_SERVER=
+[PLAY-DEBUG] DISPLAY=:0
+[PLAY-DEBUG] XDG_RUNTIME_DIR=/run/user/1000
+-rw-r--r-- 1 linaro linaro 336K  6月  3 22:26 /home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496775239.wav
+[PLAY-DEBUG] pactl info:
+服务器字串：unix:/tmp/pulse-socket
+程序库协议版本：34
+服务器协议版本：34
+是否本地服务器：是
+客户端索引：60
+区块大小: 65472
+用户名：linaro
+主机名：linaro-alip
+服务器名：pulseaudio
+服务器版本：14.2
+默认采样规格：s16le 2ch 44100Hz
+默认声道映射：front-left,front-right
+默认音频入口：alsa_output.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo
+默认信源： alsa_input.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo
+Cookie：aacd:8c81
+[PLAY-DEBUG] sinks:
+0	alsa_output.platform-bp9001-sound.stereo-fallback	module-alsa-card.c	s16le 2ch 44100Hz	SUSPENDED
+1	alsa_output.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo	module-alsa-card.c	s16le 2ch 48000Hz	IDLE
+[PLAY-DEBUG] default sink:
+未指定有效的命令。
+[PLAY-DEBUG] try paplay...
+[PLAY-DEBUG] paplay rc=0
+I:        127.0.0.1:40748 - "GET /health HTTP/1.1" 200 OK
+[TTS-API] /synthesize request
+[TTS-API] raw_text=清晨五点，天空灰暗，电线横跨画面。
+[TTS-API] play=True, split=False, out_wav=None
+[TTS-API] normalized_text=清晨五点，天空灰暗，电线横跨画面。
+[TTS-API] parts=1
+[TTS-API] synth part 1/1: 清晨五点，天空灰暗，电线横跨画面。
+E RKNN: [22:27:26.660] failed to submit!, op id: 10, op name: Transpose:/flow/flows.6/enc/attn_layers.0/Transpose_1_output_0_rs, flags: 0x5, task start: 1, task number: 54, run task counter: 32, int status: 0, please try updating to the latest version of the toolkit2 and runtime from: https://console.zbox.filez.com/l/I00fc3 (PWD: rknn)
+E RKNN: [22:27:33.060] failed to submit!, op id: 334, op name: Transpose:/flow/flows.2/enc/attn_layers.2/Div_output_0_tp_rs, flags: 0x5, task start: 2420, task number: 163, run task counter: 160, int status: 0, please try updating to the latest version of the toolkit2 and runtime from: https://console.zbox.filez.com/l/I00fc3 (PWD: rknn)
+E RKNN: [22:27:39.353] failed to submit!, op id: 349, op name: Transpose:/flow/flows.2/enc/attn_layers.2/Slice_8_output_0_tp_rs, flags: 0x5, task start: 2734, task number: 115, run task counter: 0, int status: 0, please try updating to the latest version of the toolkit2 and runtime from: https://console.zbox.filez.com/l/I00fc3 (PWD: rknn)
+E RKNN: [22:27:39.466] failed to submit!, op id: 2, op name: Reshape:z_p_rs, flags: 0x5, task start: 0, task number: 1, run task counter: 0, int status: 0x100, please try updating to the latest version of the toolkit2 and runtime from: https://console.zbox.filez.com/l/I00fc3 (PWD: rknn)
+[PersistentMeloTTS] synth chars=17 sentences=1 encoder=0.080s decoder=19.194s total=19.362s wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496840190.wav
+[TTS-API] synth done wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496840190.wav, elapsed=19.363s
+[TTS-API] play wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496840190.wav, player=/home/linaro/Qwen/tts/play_tts_debug.sh, device=plughw:4,0, wait=False
+[TTS-API] play started
+I:        127.0.0.1:34082 - "POST /speak HTTP/1.1" 200 OK
+
+========== 2026-06-03 22:27:39 ==========
+[PLAY-DEBUG] wav=/home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496840190.wav
+[PLAY-DEBUG] user=linaro
+[PLAY-DEBUG] PULSE_SERVER=
+[PLAY-DEBUG] DISPLAY=:0
+[PLAY-DEBUG] XDG_RUNTIME_DIR=/run/user/1000
+-rw-r--r-- 1 linaro linaro 336K  6月  3 22:27 /home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/output/melotts_1780496840190.wav
+[PLAY-DEBUG] pactl info:
+服务器字串：unix:/tmp/pulse-socket
+程序库协议版本：34
+服务器协议版本：34
+是否本地服务器：是
+客户端索引：63
+区块大小: 65472
+用户名：linaro
+主机名：linaro-alip
+服务器名：pulseaudio
+服务器版本：14.2
+默认采样规格：s16le 2ch 44100Hz
+默认声道映射：front-left,front-right
+默认音频入口：alsa_output.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo
+默认信源： alsa_input.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo
+Cookie：aacd:8c81
+[PLAY-DEBUG] sinks:
+0	alsa_output.platform-bp9001-sound.stereo-fallback	module-alsa-card.c	s16le 2ch 44100Hz	SUSPENDED
+1	alsa_output.usb-Razer_Razer_USB_Sound_Card_00000000-00.analog-stereo	module-alsa-card.c	s16le 2ch 48000Hz	IDLE
+[PLAY-DEBUG] default sink:
+未指定有效的命令。
+[PLAY-DEBUG] try paplay...
+[PLAY-DEBUG] paplay rc=0

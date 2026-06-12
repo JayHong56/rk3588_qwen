@@ -1,0 +1,86 @@
+[INFO] starting MeloTTS-RKNN2 service...
+[INFO] log: /home/linaro/Qwen/tts/logs/melotts_tts.log
+[INFO] waiting for MeloTTS-RKNN2: http://127.0.0.1:8010/health
+[OK] MeloTTS-RKNN2 ready
+[INFO] running voice chat...
+[PROMPT] <image>请描述这张图片。
+助手：[2026-06-03 20:32:00][QWEN] backend=cmd
+[2026-06-03 20:32:00][QWEN-CMD] start subprocess
+[2026-06-03 20:32:00][QWEN-CMD] cmd=/home/linaro/Qwen/run_qwen3vl_once.sh <image>请描述这张图片。
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] start
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] prompt=<image>请描述这张图片。
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] raw stdout log=/home/linaro/Qwen/tts/logs/qwen3vl_20260603_203200.raw_stdout.log
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] stderr log=/home/linaro/Qwen/tts/logs/qwen3vl_20260603_203200.stderr.log
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] clean answer log=/home/linaro/Qwen/tts/logs/qwen3vl_20260603_203200.clean_answer.log
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] cwd=/home/linaro/rkllm_qwen3vl4b/demo_Linux_aarch64
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] LD_LIBRARY_PATH=/home/linaro/rkllm_qwen3vl4b/demo_Linux_aarch64/lib:
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] check files
+[2026-06-03 20:32:00][QWEN-STDERR] -rwxr-xr-x 1 linaro linaro 6.6M  6月  2 19:08 ./demo
+[2026-06-03 20:32:00][QWEN-STDERR] -rw-r--r-- 1 linaro linaro 1.3M  6月  3 14:34 /home/linaro/test.jpg
+[2026-06-03 20:32:00][QWEN-STDERR] -rw-r--r-- 1 linaro linaro 4.6G  6月  2 19:11 ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm
+[2026-06-03 20:32:00][QWEN-STDERR] -rw-r--r-- 1 linaro linaro 829M  6月  2 19:11 ./qwen3-vl_vision_rk3588.rknn
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] launch demo
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-WRAPPER] cmd=timeout 600 stdbuf -oL -eL ./demo /home/linaro/test.jpg ./qwen3-vl_vision_rk3588.rknn ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm 256 4096 3 <|vision_start|> <|vision_end|> <|image_pad|>
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-DEMO-OUT] W rkllm: Warning: Your rknpu driver version is too low, please upgrade to 0.9.7
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-DEMO-OUT] I rkllm: rkllm-runtime version: 1.2.3, rknpu driver version: 0.9.6, platform: RK3588
+[2026-06-03 20:32:00][QWEN-STDERR] [2026-06-03 20:32:00][QWEN-DEMO-OUT] I rkllm: loading rkllm model from ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm
+[2026-06-03 20:32:01][QWEN-STDERR] [2026-06-03 20:32:01][QWEN-DEMO-OUT] I rkllm: rkllm-toolkit version: 1.2.3, max_context_limit: 4096, npu_core_num: 3, target_platform: RK3588, model_dtype: W8A8
+[2026-06-03 20:32:05][QWEN-STDERR] [2026-06-03 20:32:05][QWEN-DEMO-OUT] I rkllm: Enabled cpus: [4, 5, 6, 7]
+[2026-06-03 20:32:05][QWEN-STDERR] [2026-06-03 20:32:05][QWEN-DEMO-OUT] I rkllm: Enabled cpus num: 4
+[2026-06-03 20:32:05][QWEN-STDERR] [2026-06-03 20:32:05][QWEN-DEMO-OUT] I rkllm: Using mrope
+[2026-06-03 20:32:05][QWEN-STDERR] [2026-06-03 20:32:05][QWEN-DEMO-OUT] rkllm init success
+[2026-06-03 20:32:05][QWEN-STDERR] [2026-06-03 20:32:05][QWEN-DEMO-OUT] main: LLM Model loaded in  4523.85 ms
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT] ===the core num is 3===
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT] model input num: 1, output num: 4
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT] input tensors:
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT]   index=0, name=pixel, n_dims=4, dims=[1, 448, 448, 3], n_elems=602112, size=1204224, fmt=NHWC, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT] output tensors:
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT]   index=0, name=4820, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT]   index=1, name=1669, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT]   index=2, name=2720, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT]   index=3, name=3771, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT] model input height=448, width=448, channel=3
+[2026-06-03 20:32:06][QWEN-STDERR] [2026-06-03 20:32:06][QWEN-DEMO-OUT] main: ImgEnc Model loaded in   765.23 ms
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] main: ImgEnc Model inference took  2207.34 ms
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] **********************可输入以下问题对应序号获取回答/或自定义输入********************
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] [0] <image>What is in the image?
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] [1] <image>这张图片中有什么？
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] *************************************************************************
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:08][QWEN-STDERR] [2026-06-03 20:32:08][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:10][QWEN-WATCHDOG] qwen still running, elapsed=10s, pid=2365064
+[2026-06-03 20:32:14][QWEN-STDERR] [2026-06-03 20:32:14][QWEN-DEMO-OUT] user: robot: 好的，这是一张在黎明或清晨时分拍摄的户外监控画面。
+[2026-06-03 20:32:14][QWEN-STDERR] [2026-06-03 20:32:14][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:15][QWEN-STDERR] [2026-06-03 20:32:15][QWEN-DEMO-OUT] **核心内容：**
+[2026-06-03 20:32:15][QWEN-STDERR] [2026-06-03 20:32:15][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:19][QWEN-STDERR] [2026-06-03 20:32:19][QWEN-DEMO-OUT] *   **场景：** 一片开阔的、略显荒凉的田野或空地。
+[2026-06-03 20:32:20][QWEN-WATCHDOG] qwen still running, elapsed=20s, pid=2365064
+[2026-06-03 20:32:30][QWEN-WATCHDOG] qwen still running, elapsed=30s, pid=2365064
+[2026-06-03 20:32:31][QWEN-STDERR] [2026-06-03 20:32:31][QWEN-DEMO-OUT] *   **时间与天气：** 图片左上角显示时间为“05:10:01”，日期为“19日 星期四”。天空灰暗，光线昏暗，表明是黎明前或刚破晓时分。整体氛围宁静、略带阴沉。
+[2026-06-03 20:32:33][QWEN-STDERR] [2026-06-03 20:32:33][QWEN-DEMO-OUT] *   **主要物体：**
+[2026-06-03 20:32:37][QWEN-STDERR] [2026-06-03 20:32:37][QWEN-DEMO-OUT]     *   多条高压电线横跨画面，从左上角向右上方延伸，形成明显的线条。
+[2026-06-03 20:32:40][QWEN-WATCHDOG] qwen still running, elapsed=40s, pid=2365064
+[2026-06-03 20:32:42][QWEN-STDERR] [2026-06-03 20:32:42][QWEN-DEMO-OUT]     *   电线杆（或铁塔）在远处的地平线上可见，呈规律分布。
+[2026-06-03 20:32:45][QWEN-STDERR] [2026-06-03 20:32:45][QWEN-DEMO-OUT]     *   地面是大片的田野，地势平坦。
+[2026-06-03 20:32:45][QWEN-STDERR] [2026-06-03 20:32:45][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:46][QWEN-STDERR] [2026-06-03 20:32:46][QWEN-DEMO-OUT] **图像标注：**
+[2026-06-03 20:32:46][QWEN-STDERR] [2026-06-03 20:32:46][QWEN-DEMO-OUT] 
+[2026-06-03 20:32:48][QWEN-STDERR] [2026-06-03 20:32:48][QWEN-DEMO-OUT] *   **绿色方框与数字：**
+[2026-06-03 20:32:50][QWEN-WATCHDOG] qwen still running, elapsed=50s, pid=2365064
+[2026-06-03 20:33:00][QWEN-WATCHDOG] qwen still running, elapsed=60s, pid=2365064
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT]     *   图像中出现了三个绿色的方形标记框，分别位于画面左上、中上和右上区域。每个框内都有一个“X”符号，并附带一个数字（如 `0.00`、`0.87`、`0.26`）。这些
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm:  Model init time (ms)  3674.17                                                                    
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm:  Stage         Total Time (ms)  Tokens    Time per Token (ms)      Tokens per Second      
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm:  Prefill       2782.11          211       13.19                    75.84                  
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm:  Generate      49806.09         255       195.32                   5.12                   
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm:  Peak Memory Usage (GB)
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm:  5.44        
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 20:33:01][QWEN-STDERR] [2026-06-03 20:33:01][QWEN-DEMO-OUT] 

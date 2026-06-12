@@ -1,0 +1,91 @@
+[INFO] starting MeloTTS-RKNN2 service...
+[INFO] log: /home/linaro/Qwen/tts/logs/melotts_tts.log
+[INFO] waiting for MeloTTS-RKNN2: http://127.0.0.1:8010/health
+[OK] MeloTTS-RKNN2 ready
+[INFO] running voice chat...
+[PROMPT] 请描述这张图片。
+助手：[2026-06-03 20:22:43][QWEN] backend=cmd
+[2026-06-03 20:22:43][QWEN-CMD] start subprocess
+[2026-06-03 20:22:43][QWEN-CMD] cmd=/home/linaro/Qwen/run_qwen3vl_once.sh 请描述这张图片。
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] start
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] prompt=请描述这张图片。
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] stdout log=/home/linaro/Qwen/tts/logs/qwen3vl_20260603_202243.stdout.log
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] stderr log=/home/linaro/Qwen/tts/logs/qwen3vl_20260603_202243.stderr.log
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] cwd=/home/linaro/rkllm_qwen3vl4b/demo_Linux_aarch64
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] LD_LIBRARY_PATH=/home/linaro/rkllm_qwen3vl4b/demo_Linux_aarch64/lib:
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] check files
+[2026-06-03 20:22:43][QWEN-STDERR] -rwxr-xr-x 1 linaro linaro 6.6M  6月  2 19:08 ./demo
+[2026-06-03 20:22:43][QWEN-STDERR] -rw-r--r-- 1 linaro linaro 1.3M  6月  3 14:34 /home/linaro/test.jpg
+[2026-06-03 20:22:43][QWEN-STDERR] -rw-r--r-- 1 linaro linaro 4.6G  6月  2 19:11 ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm
+[2026-06-03 20:22:43][QWEN-STDERR] -rw-r--r-- 1 linaro linaro 829M  6月  2 19:11 ./qwen3-vl_vision_rk3588.rknn
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] launch demo
+[2026-06-03 20:22:43][QWEN-STDERR] [2026-06-03 20:22:43][QWEN-WRAPPER] cmd=timeout 600 stdbuf -oL -eL ./demo /home/linaro/test.jpg ./qwen3-vl_vision_rk3588.rknn ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm 256 4096 3 <|vision_start|> <|vision_end|> <|image_pad|>
+[2026-06-03 20:22:43][QWEN-CMD] first stdout received after 0.09s
+W rkllm: Warning: Your rknpu driver version is too low, please upgrade to 0.9.7
+I rkllm: rkllm-r[2026-06-03 20:22:43][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:22:43][TTS] text=Wrkllm:Warning:Yourrknpudriverversionistoolow,pleaseupgradeto0.9.7Irkllm:rkllm-r
+[2026-06-03 20:22:53][QWEN-WATCHDOG] qwen still running, elapsed=10s, pid=2363134
+[2026-06-03 20:23:03][QWEN-WATCHDOG] qwen still running, elapsed=20s, pid=2363134
+[2026-06-03 20:23:09][QWEN-STDERR] [2026-06-03 20:23:09][QWEN-DEMO-ERR] E RKNN: [20:23:09.727] failed to submit!, op id: 0, op name: Unknown, flags: 0x5, task start: 5, task number: 1, run task counter: 0, int status: 0, If using rknn, update to the latest toolkit2 and runtime from: https://console.zbox.filez.com/l/I00fc3 (PWD: rknn). If using rknn-llm, update from: https://github.com/airockchip/rknn-llm
+[2026-06-03 20:23:13][QWEN-WATCHDOG] qwen still running, elapsed=30s, pid=2363134
+[2026-06-03 20:23:17][TTS] response status=200, elapsed=33.59s
+[2026-06-03 20:23:17][QWEN-CMD] received stdout chars=97
+untime version: 1.2.3, rknpu driver version: 0.9.6, platform: RK3588
+I rkllm: loading rkllm m[2026-06-03 20:23:17][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:23:17][TTS] text=untimeversion:1.2.3,rknpudriverversion:0.9.6,platform:RK3588Irkllm:loadingrkllmm
+[2026-06-03 20:23:23][QWEN-WATCHDOG] qwen still running, elapsed=40s, pid=2363134
+[2026-06-03 20:23:30][QWEN-STDERR] [2026-06-03 20:23:30][QWEN-WRAPPER] demo exit code=0
+[2026-06-03 20:24:55][TTS] response status=200, elapsed=98.27s
+[2026-06-03 20:24:55][QWEN-CMD] received stdout chars=190
+odel from ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm
+I rkllm: rkllm-toolkit version: 1.2.3,[2026-06-03 20:24:55][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:24:55][TTS] text=odelfrom./qwen3-vl-4b-instructw8a8rk3588.rkllmIrkllm:rkllm-toolkitversion:1.2.3,
+[2026-06-03 20:25:29][TTS] response status=200, elapsed=33.81s
+[2026-06-03 20:25:29][QWEN-CMD] received stdout chars=279
+ max_context_limit: 4096, npu_core_num: 3, target_platform: RK3588, model_dtype: W8A8
+I rkllm: En[2026-06-03 20:25:29][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:25:29][TTS] text=maxcontextlimit:4096,npucorenum:3,targetplatform:RK3588,modeldtype:W8A8Irkllm:En
+[2026-06-03 20:26:05][TTS] response status=200, elapsed=36.48s
+[2026-06-03 20:26:05][QWEN-CMD] received stdout chars=376
+abled cpus: [4, 5, 6, 7]
+I rkllm: Enabled cpus num: 4
+I rkllm: Using mrope
+rkllm init success
+main: LL[2026-06-03 20:26:05][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:26:05][TTS] text=abledcpus:4,5,6,7Irkllm:Enabledcpusnum:4Irkllm:Usingmroperkllminitsuccessmain:LL
+[2026-06-03 20:26:35][TTS] response status=200, elapsed=29.71s
+[2026-06-03 20:26:35][QWEN-CMD] received stdout chars=478
+M Model loaded in  4666.89 ms
+===the core num is 3===
+model input num: 1, output num: 4
+input tensor[2026-06-03 20:26:35][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:26:35][TTS] text=MModelloadedin4666.89ms===thecorenumis3===modelinputnum:1,outputnum:4inputtensor
+[2026-06-03 20:27:06][TTS] response status=200, elapsed=30.85s
+[2026-06-03 20:27:06][QWEN-CMD] received stdout chars=578
+s:
+  index=0, name=pixel, n_dims=4, dims=[1, 448, 448, 3], n_elems=602112, size=1204224, fmt=NHW[2026-06-03 20:27:06][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:27:06][TTS] text=s:index=0,name=pixel,ndims=4,dims=1,448,448,3,nelems=602112,size=1204224,fmt=NHW
+[2026-06-03 20:27:39][TTS] response status=200, elapsed=33.03s
+[2026-06-03 20:27:39][QWEN-CMD] received stdout chars=674
+C, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+output tensors:
+  index=0, name=4820, n_d[2026-06-03 20:27:39][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:27:39][TTS] text=C,type=FP16,qnttype=AFFINE,zp=0,scale=1.000000outputtensors:index=0,name=4820,nd
+[2026-06-03 20:28:09][TTS] response status=200, elapsed=29.73s
+[2026-06-03 20:28:09][QWEN-CMD] received stdout chars=767
+ims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_ty[2026-06-03 20:28:09][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:28:09][TTS] text=ims=2,dims=196,2560,0,0,nelems=501760,size=1003520,fmt=UNDEFINED,type=FP16,qntty
+[2026-06-03 20:28:44][TTS] response status=200, elapsed=35.96s
+[2026-06-03 20:28:44][QWEN-CMD] received stdout chars=860
+pe=AFFINE, zp=0, scale=1.000000
+  index=1, name=1669, n_dims=2, dims=[196, 2560, 0, 0], n_elems=[2026-06-03 20:28:44][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:28:44][TTS] text=pe=AFFINE,zp=0,scale=1.000000index=1,name=1669,ndims=2,dims=196,2560,0,0,nelems=
+[2026-06-03 20:29:15][TTS] response status=200, elapsed=30.48s
+[2026-06-03 20:29:15][QWEN-CMD] received stdout chars=956
+501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+  in[2026-06-03 20:29:15][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:29:15][TTS] text=501760,size=1003520,fmt=UNDEFINED,type=FP16,qnttype=AFFINE,zp=0,scale=1.000000in
+[2026-06-03 20:29:44][TTS] response status=200, elapsed=28.76s
+[2026-06-03 20:29:44][QWEN-CMD] received stdout chars=1046
+dex=2, name=2720, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFIN[2026-06-03 20:29:44][TTS] POST http://127.0.0.1:8010/speak, chars=80, play=True, split=False
+[2026-06-03 20:29:44][TTS] text=dex=2,name=2720,ndims=2,dims=196,2560,0,0,nelems=501760,size=1003520,fmt=UNDEFIN

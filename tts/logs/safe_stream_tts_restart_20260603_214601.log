@@ -1,0 +1,10 @@
+[2026-06-03 21:46:01][CONFIG] QWEN_CMD=/home/linaro/Qwen/run_qwen3vl_stream.sh
+[2026-06-03 21:46:01][CONFIG] TTS_URL=http://127.0.0.1:8010/speak
+[2026-06-03 21:46:01][MODE] SAFE: Qwen runs first, TTS starts after Qwen exits to avoid NPU contention
+[2026-06-03 21:46:01][QWEN] cmd=/home/linaro/Qwen/run_qwen3vl_stream.sh <image>请用一句话描述这张图片，不超过30个字。
+Traceback (most recent call last):
+  File "/home/linaro/Qwen/tts/stream_qwen_tts_safe.py", line 161, in <module>
+    main()
+  File "/home/linaro/Qwen/tts/stream_qwen_tts_safe.py", line 84, in main
+    proc = subprocess.Popen(
+UnboundLocalError: local variable 'subprocess' referenced before assignment

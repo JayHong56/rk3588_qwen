@@ -1,0 +1,75 @@
+[2026-06-03 21:45:21][CONFIG] QWEN_CMD=/home/linaro/Qwen/run_qwen3vl_stream.sh
+[2026-06-03 21:45:21][CONFIG] TTS_URL=http://127.0.0.1:8010/speak
+[2026-06-03 21:45:21][MODE] SAFE: Qwen runs first, TTS starts after Qwen exits to avoid NPU contention
+[2026-06-03 21:45:21][QWEN] cmd=/home/linaro/Qwen/run_qwen3vl_stream.sh <image>请用一句话描述这张图片，不超过30个字。
+助手：[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-STREAM-WRAPPER] start
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-STREAM-WRAPPER] user_prompt=<image>请用一句话描述这张图片，不超过30个字。
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-STREAM-WRAPPER] send_prompt=<image>请用一句话描述这张图片，不超过30个字。
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-STREAM-WRAPPER] raw stdout log=/home/linaro/Qwen/tts/logs/qwen3vl_stream_20260603_214521.raw_stdout.log
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-STREAM-WRAPPER] clean stream log=/home/linaro/Qwen/tts/logs/qwen3vl_stream_20260603_214521.clean_stream.log
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-STREAM-WRAPPER] launch demo
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-STREAM-WRAPPER] cmd=timeout 600 stdbuf -oL -eL ./demo /home/linaro/test.jpg ./qwen3-vl_vision_rk3588.rknn ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm 256 4096 3 <|vision_start|> <|vision_end|> <|image_pad|>
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-FILTER] stream filter started
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-DEMO-OUT] W rkllm: Warning: Your rknpu driver version is too low, please upgrade to 0.9.7
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-DEMO-OUT] I rkllm: rkllm-runtime version: 1.2.3, rknpu driver version: 0.9.6, platform: RK3588
+[2026-06-03 21:45:21][QWEN-STDERR] [2026-06-03 21:45:21][QWEN-DEMO-OUT] I rkllm: loading rkllm model from ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm
+[2026-06-03 21:45:22][QWEN-STDERR] [2026-06-03 21:45:22][QWEN-DEMO-OUT] I rkllm: rkllm-toolkit version: 1.2.3, max_context_limit: 4096, npu_core_num: 3, target_platform: RK3588, model_dtype: W8A8
+[2026-06-03 21:45:25][QWEN-STDERR] [2026-06-03 21:45:25][QWEN-DEMO-OUT] I rkllm: Enabled cpus: [4, 5, 6, 7]
+[2026-06-03 21:45:25][QWEN-STDERR] [2026-06-03 21:45:25][QWEN-DEMO-OUT] I rkllm: Enabled cpus num: 4
+[2026-06-03 21:45:25][QWEN-STDERR] [2026-06-03 21:45:25][QWEN-DEMO-OUT] I rkllm: Using mrope
+[2026-06-03 21:45:25][QWEN-STDERR] [2026-06-03 21:45:25][QWEN-DEMO-OUT] rkllm init success
+[2026-06-03 21:45:25][QWEN-STDERR] [2026-06-03 21:45:25][QWEN-DEMO-OUT] main: LLM Model loaded in  4224.56 ms
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] ===the core num is 3===
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] model input num: 1, output num: 4
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] input tensors:
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] index=0, name=pixel, n_dims=4, dims=[1, 448, 448, 3], n_elems=602112, size=1204224, fmt=NHWC, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] output tensors:
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] index=0, name=4820, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] index=1, name=1669, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] index=2, name=2720, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] index=3, name=3771, n_dims=2, dims=[196, 2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16, qnt_type=AFFINE, zp=0, scale=1.000000
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] model input height=448, width=448, channel=3
+[2026-06-03 21:45:26][QWEN-STDERR] [2026-06-03 21:45:26][QWEN-DEMO-OUT] main: ImgEnc Model loaded in   852.16 ms
+[2026-06-03 21:45:28][QWEN-STDERR] [2026-06-03 21:45:28][QWEN-DEMO-OUT] main: ImgEnc Model inference took  2221.36 ms
+[2026-06-03 21:45:28][QWEN-STDERR] [2026-06-03 21:45:28][QWEN-DEMO-OUT] **********************可输入以下问题对应序号获取回答/或自定义输入********************
+[2026-06-03 21:45:28][QWEN-STDERR] [2026-06-03 21:45:28][QWEN-FILTER] answer stream started
+[2026-06-03 21:45:28][QWEN-STDERR] [2026-06-03 21:45:28][QWEN-DEMO-OUT] [0] <image>What is in the image?
+[2026-06-03 21:45:28][QWEN-STDERR] [2026-06-03 21:45:28][QWEN-DEMO-OUT] [1] <image>这张图片中有什么？
+[2026-06-03 21:45:28][QWEN-STDERR] [2026-06-03 21:45:28][QWEN-DEMO-OUT] *************************************************************************
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] user: robot: 清晨电线杆与田野，监控画面显示时间与坐标信息。
+[2026-06-03 21:45:34][QWEN] first stdout after 12.899s
+清晨电线杆与田野，监控画面显示时间与坐标信息。
+[2026-06-03 21:45:34][QUEUE] cache sentence idx=1, chars=23
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm:  Model init time (ms)  3406.39
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm:  Stage         Total Time (ms)  Tokens    Time per Token (ms)      Tokens per Second
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm:  Prefill       2779.08          219       12.69                    78.80
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm:  Generate      2679.03          14        191.36                   5.23
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm:  Peak Memory Usage (GB)
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm:  5.44
+[2026-06-03 21:45:34][QWEN-STDERR] [2026-06-03 21:45:34][QWEN-DEMO-OUT] I rkllm: --------------------------------------------------------------------------------------
+[2026-06-03 21:45:36][QWEN-STDERR] [2026-06-03 21:45:36][QWEN-DEMO-OUT] user:
+[2026-06-03 21:45:36][QWEN-STDERR] [2026-06-03 21:45:36][QWEN-FILTER] stream filter finished
+[2026-06-03 21:45:36][QWEN-STDERR] [2026-06-03 21:45:36][QWEN-STREAM-WRAPPER] pipeline status: input=0 demo=0 filter=0
+[2026-06-03 21:45:36][QWEN-STDERR] [2026-06-03 21:45:36][QWEN-STREAM-WRAPPER] done
+
+[2026-06-03 21:45:36][QWEN] finished rc=0, elapsed=15.193s, sentences=1
+[2026-06-03 21:45:36][TTS] wait 5.0s before speaking to let NPU resources settle
+[2026-06-03 21:45:41][TTS] start speaking after Qwen finished
+[2026-06-03 21:45:41][TTS] POST idx=1, chars=23
+[2026-06-03 21:45:41][TTS] text=清晨电线杆与田野，监控画面显示时间与坐标信息。
+[2026-06-03 21:45:41][TTS] status=500, elapsed=0.076s
+[2026-06-03 21:45:41][TTS] resp=Internal Server Error
+Traceback (most recent call last):
+  File "/home/linaro/Qwen/tts/stream_qwen_tts_safe.py", line 153, in <module>
+    main()
+  File "/home/linaro/Qwen/tts/stream_qwen_tts_safe.py", line 147, in main
+    tts_speak(i, s)
+  File "/home/linaro/Qwen/tts/stream_qwen_tts_safe.py", line 69, in tts_speak
+    r.raise_for_status()
+  File "/usr/lib/python3/dist-packages/requests/models.py", line 943, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/speak

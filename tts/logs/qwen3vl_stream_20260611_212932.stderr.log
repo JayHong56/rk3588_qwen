@@ -1,0 +1,9 @@
+[2026-06-11 21:29:32][QWEN-STREAM-WRAPPER] start
+[2026-06-11 21:29:32][QWEN-STREAM-WRAPPER] user_prompt=<image>请详细描述这张图片，分成5句话，每句话不超过25个字。
+[2026-06-11 21:29:32][QWEN-STREAM-WRAPPER] send_prompt=<image>请详细描述这张图片，分成5句话，每句话不超过25个字。
+[2026-06-11 21:29:32][QWEN-STREAM-WRAPPER] raw stdout log=/home/linaro/Qwen/tts/logs/qwen3vl_stream_20260611_212932.raw_stdout.log
+[2026-06-11 21:29:32][QWEN-STREAM-WRAPPER] clean stream log=/home/linaro/Qwen/tts/logs/qwen3vl_stream_20260611_212932.clean_stream.log
+[2026-06-11 21:29:32][QWEN-STREAM-WRAPPER] launch demo
+[2026-06-11 21:29:32][QWEN-STREAM-WRAPPER] cmd=timeout 600 stdbuf -oL -eL ./demo /home/linaro/test.jpg ./qwen3-vl_vision_rk3588.rknn ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm 256 4096 3 <|vision_start|> <|vision_end|> <|image_pad|>
+[2026-06-11 21:29:56][QWEN-STREAM-WRAPPER] pipeline status: input=0 demo=0 filter=0
+[2026-06-11 21:29:56][QWEN-STREAM-WRAPPER] done
