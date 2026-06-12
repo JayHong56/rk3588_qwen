@@ -1,0 +1,15 @@
+[Unit]
+Description=MeloTTS-RKNN2 TTS Service on RK3588
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@@PROJECT_DIR@@
+EnvironmentFile=-@@PROJECT_DIR@@/config/melotts.env
+ExecStart=@@PROJECT_DIR@@/.venv/bin/uvicorn app.tts_api:app --host ${MELOTTS_HOST} --port ${MELOTTS_PORT}
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

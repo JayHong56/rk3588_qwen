@@ -1,0 +1,16 @@
+.env.example
+README.md
+bridge/demo_bridge_api.py
+bridge/requirements.txt
+bridge/run_bridge.sh
+scripts/00_check_board.sh
+scripts/01_install_deps.sh
+scripts/02_install_app.sh
+scripts/03_run_demo.sh
+scripts/04_fix_freq_wrapper.sh
+scripts/05_install_systemd_cli.sh
+scripts/06_logs.sh
+scripts/07_install_bridge_service.sh
+scripts/common.sh
+systemd/qwen25-rkllm-bridge.service.template
+systemd/qwen25-rkllm-cli.service.template

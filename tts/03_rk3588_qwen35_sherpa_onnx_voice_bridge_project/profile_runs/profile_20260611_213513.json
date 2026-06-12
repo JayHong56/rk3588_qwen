@@ -1,0 +1,89 @@
+{
+  "summary": {
+    "prompt": "<image>请详细描述这张图片，分成5句话，每句话不超过25个字。",
+    "qwen_first_chunk_s": 13.254383674000564,
+    "qwen_total_s": 46.57778667299863,
+    "qwen_answer_chars": 96,
+    "sentence_count": 5,
+    "tts_success_count": 5,
+    "tts_http_wall_total_s": 33.30867473100079,
+    "tts_engine_total_s": 15.334156513214111,
+    "tts_audio_total_s": 16.566621315192744,
+    "tts_avg_engine_rtf": 0.9256055427036063,
+    "play": true
+  },
+  "sentences": [
+    {
+      "index": 1,
+      "text": "清晨五点，天空灰暗，电线横跨画面。",
+      "chars": 17,
+      "qwen_sentence_ready_s": 13.25828434000141,
+      "tts_http_wall_s": 8.297846515997662,
+      "tts_engine_elapsed_s": 4.444367170333862,
+      "tts_audio_duration_s": 3.5294331065759637,
+      "tts_rtf": 1.2592297505379018,
+      "tts_output": "profile_runs/wavs_20260611_213513/tts_001_1781184926376.wav",
+      "tts_endpoint": "/speak",
+      "tts_played": true
+    },
+    {
+      "index": 2,
+      "text": "远处可见输电塔与微弱灯光点缀田野。",
+      "chars": 17,
+      "qwen_sentence_ready_s": 21.558234895004716,
+      "tts_http_wall_s": 6.385130943999684,
+      "tts_engine_elapsed_s": 3.071735143661499,
+      "tts_audio_duration_s": 3.111473922902494,
+      "tts_rtf": 0.9872283103681212,
+      "tts_output": "profile_runs/wavs_20260611_213513/tts_002_1781184934676.wav",
+      "tts_endpoint": "/speak",
+      "tts_played": true
+    },
+    {
+      "index": 3,
+      "text": "绿色标记显示多个监控点位分布情况。",
+      "chars": 17,
+      "qwen_sentence_ready_s": 27.946825222999905,
+      "tts_http_wall_s": 5.414193365999381,
+      "tts_engine_elapsed_s": 2.212357521057129,
+      "tts_audio_duration_s": 2.9257142857142857,
+      "tts_rtf": 0.7561768870800734,
+      "tts_output": "profile_runs/wavs_20260611_213513/tts_003_1781184941065.wav",
+      "tts_endpoint": "/speak",
+      "tts_played": true
+    },
+    {
+      "index": 4,
+      "text": "地面平坦开阔，无明显建筑或车辆活动。",
+      "chars": 18,
+      "qwen_sentence_ready_s": 33.363678822999645,
+      "tts_http_wall_s": 6.387945727001352,
+      "tts_engine_elapsed_s": 2.6739320755004883,
+      "tts_audio_duration_s": 3.4481632653061225,
+      "tts_rtf": 0.7754656232216142,
+      "tts_output": "profile_runs/wavs_20260611_213513/tts_004_1781184946482.wav",
+      "tts_endpoint": "/speak",
+      "tts_played": true
+    },
+    {
+      "index": 5,
+      "text": "右下角标注“东三I线”，左上角显示日期时间。",
+      "chars": 22,
+      "qwen_sentence_ready_s": 39.753189016999386,
+      "tts_http_wall_s": 6.823558178002713,
+      "tts_engine_elapsed_s": 2.931764602661133,
+      "tts_audio_duration_s": 3.5518367346938775,
+      "tts_rtf": 0.8254221186531574,
+      "tts_output": "profile_runs/wavs_20260611_213513/tts_005_1781184952871.wav",
+      "tts_endpoint": "/speak",
+      "tts_played": true
+    }
+  ],
+  "env": {
+    "QWEN_BACKEND": "command",
+    "QWEN_CMD": "/home/linaro/Qwen/run_qwen3vl_stream.sh",
+    "TTS_API_BASE": "http://127.0.0.1:8011",
+    "TTS_SID": 0,
+    "TTS_SPEED": 1.0
+  }
+}

@@ -1,0 +1,13 @@
+[Unit]
+Description=RK3588 Qwen3.5 + sherpa-onnx Voice Bridge
+After=network-online.target sherpa-onnx-tts.service
+Wants=network-online.target
+[Service]
+Type=simple
+WorkingDirectory={{PROJECT_ROOT}}
+Environment=VOICE_BRIDGE_ENV={{PROJECT_ROOT}}/config/voice_bridge.env
+ExecStart={{PROJECT_ROOT}}/scripts/05_start_bridge_api.sh
+Restart=always
+RestartSec=3
+[Install]
+WantedBy=multi-user.target

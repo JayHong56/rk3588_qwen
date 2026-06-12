@@ -1,0 +1,21 @@
+[Unit]
+Description=Qwen2.5 RKLLM demo HTTP bridge, test only
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=__RUN_USER__
+WorkingDirectory=__APP_DIR__
+Environment=LD_LIBRARY_PATH=__APP_DIR__/lib
+Environment=RKLLM_LOG_LEVEL=__RKLLM_LOG_LEVEL__
+Environment=MODEL_FILE=__MODEL_FILE__
+Environment=MAX_NEW_TOKENS=__MAX_NEW_TOKENS__
+Environment=MAX_CONTEXT_LEN=__MAX_CONTEXT_LEN__
+Environment=BRIDGE_HOST=__BRIDGE_HOST__
+Environment=BRIDGE_PORT=__BRIDGE_PORT__
+ExecStart=__APP_DIR__/venv/bin/python __APP_DIR__/bridge/demo_bridge_api.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

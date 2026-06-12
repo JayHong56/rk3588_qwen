@@ -1,0 +1,16 @@
+[Unit]
+Description=Qwen2.5-1.5B RKLLM CLI Demo
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=__RUN_USER__
+WorkingDirectory=__APP_DIR__
+Environment=LD_LIBRARY_PATH=__APP_DIR__/lib
+Environment=RKLLM_LOG_LEVEL=__RKLLM_LOG_LEVEL__
+ExecStart=__APP_DIR__/llm_demo __APP_DIR__/__MODEL_FILE__ __MAX_NEW_TOKENS__ __MAX_CONTEXT_LEN__
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,51 @@
+{
+  "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+  "root": "output/MeloTTS-RKNN2-runtime",
+  "files": [
+    {
+      "path": "UPSTREAM_README.md",
+      "size": 1832,
+      "sha256": "dc550318ef8457447a3f8afdccf0a026a5b47102ec9578f8f1d62f08c9b8977f"
+    },
+    {
+      "path": "decoder.rknn",
+      "size": 81626893,
+      "sha256": "df05f8d7926b400ffd6e0b0becd83e4cf53d7b82c4ef15d739cf2b7e6301b0de"
+    },
+    {
+      "path": "encoder.onnx",
+      "size": 31397760,
+      "sha256": "630324788bca80fb933b931cc1f5f0321a8ae66e8d257489819d1f890da02309"
+    },
+    {
+      "path": "g.bin",
+      "size": 1024,
+      "sha256": "c70d897674847882bd35e780aee696ddaff8d04d5c57e4f9cf37611b6821879f"
+    },
+    {
+      "path": "lexicon.txt",
+      "size": 6837676,
+      "sha256": "61701c526932f1aa8ce4fcb1a79a21f4cedbb38ae051f2ede7d092bf4a0c644c"
+    },
+    {
+      "path": "melotts_rknn.py",
+      "size": 10669,
+      "sha256": "cce5a53f1520582e279fe1e0b4355531bb7b6f77f4c40eb43f118bd8b1b361b0"
+    },
+    {
+      "path": "requirements.txt",
+      "size": 280,
+      "sha256": "64bb5274af7cae40440c362f59de57786e9eb36c945544d6e4dba4741c5902e3"
+    },
+    {
+      "path": "tokens.txt",
+      "size": 655,
+      "sha256": "d18664a7e12bd7ea1022ddaf951e534e136815016c5a809d6b64156bffb4369d"
+    },
+    {
+      "path": "utils.py",
+      "size": 6830,
+      "sha256": "cd85a790279335bd94a10f34eb4438e2636dba1c1c764e0975c0ab249671e399"
+    }
+  ]
+}

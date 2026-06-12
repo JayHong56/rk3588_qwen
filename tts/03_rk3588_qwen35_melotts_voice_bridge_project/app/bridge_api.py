@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+import os
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
+from app.qwen_client import QwenClient
+from app.melotts_client import MeloTTSClient
+from app.sentence_streamer import SentenceStreamer
+from app.text_cleaner import clean_for_speech
+
+load_dotenv("config/voice_bridge.env")
+app=FastAPI(title="Qwen3.5 + MeloTTS-RKNN2 Voice Bridge")
+
+class ChatSpeakRequest(BaseModel):
+    prompt: str = Field(..., min_length=1)
+    speak: bool = True
+
+@app.get("/health")
+def health():
+    return {"ok": True, "qwen_backend": os.getenv("QWEN_BACKEND","openai"), "tts_url": os.getenv("TTS_API_URL","")}
+
+@app.post("/chat_speak")
+def chat_speak(req: ChatSpeakRequest):
+    qwen=QwenClient()
+    tts=MeloTTSClient()
+    splitter=SentenceStreamer(int(os.getenv("MAX_SENTENCE_CHARS","80")), int(os.getenv("MIN_SPEAK_CHARS","4")))
+    full, spoken = [], []
+    for token in qwen.stream_chat(req.prompt):
+        full.append(token)
+        if req.speak:
+            for sent in splitter.feed(token):
+                sent = clean_for_speech(sent)
+                if sent:
+                    tts.speak(sent)
+                    spoken.append(sent)
+    if req.speak:
+        for sent in splitter.flush():
+            sent=clean_for_speech(sent)
+            if sent:
+                tts.speak(sent)
+                spoken.append(sent)
+    return {"ok": True, "answer": "".join(full), "spoken": spoken}

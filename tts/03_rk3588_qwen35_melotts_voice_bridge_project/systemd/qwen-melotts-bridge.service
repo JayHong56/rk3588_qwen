@@ -1,0 +1,15 @@
+[Unit]
+Description=Qwen3.5 + MeloTTS-RKNN2 Voice Bridge
+After=network-online.target melotts-rknn2.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@@PROJECT_DIR@@
+EnvironmentFile=-@@PROJECT_DIR@@/config/voice_bridge.env
+ExecStart=@@PROJECT_DIR@@/.venv/bin/uvicorn app.bridge_api:app --host ${BRIDGE_HOST} --port ${BRIDGE_PORT}
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

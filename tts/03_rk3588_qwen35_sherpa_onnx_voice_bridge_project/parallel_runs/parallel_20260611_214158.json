@@ -1,0 +1,93 @@
+{
+  "summary": {
+    "prompt": "<image>请详细描述这张图片，分成5句话，每句话不超过25个字。",
+    "qwen_first_chunk_s": 12.851510558000882,
+    "qwen_done_s": 23.776999320994946,
+    "total_done_s": 46.392218535998836,
+    "answer_chars": 96,
+    "sentence_count": 5,
+    "tts_success_count": 5,
+    "tts_http_wall_total_s": 33.53240261600877,
+    "tts_engine_total_s": 15.49267864227295,
+    "tts_audio_total_s": 16.567891156462586,
+    "tts_avg_engine_rtf": 0.935102632915944,
+    "play": true
+  },
+  "sentences": [
+    {
+      "index": 1,
+      "text": "清晨五点，天空灰暗，电线横跨画面。",
+      "chars": 17,
+      "qwen_sentence_ready_s": 12.853407517999585,
+      "tts_start_s": 12.853634137994959,
+      "tts_done_s": 21.589694973001315,
+      "tts_queue_wait_s": 0.00022661999537376687,
+      "tts_http_wall_s": 8.735048774004099,
+      "tts_engine_elapsed_s": 4.839222192764282,
+      "tts_audio_duration_s": 3.5294331065759637,
+      "tts_rtf": 1.3711046637342263,
+      "tts_output": "parallel_runs/wavs_20260611_214158/tts_001_1781185331841.wav",
+      "tts_played": true
+    },
+    {
+      "index": 2,
+      "text": "远处可见输电塔与微弱灯光点缀田野。",
+      "chars": 17,
+      "qwen_sentence_ready_s": 14.889494725000986,
+      "tts_start_s": 21.58996621699771,
+      "tts_done_s": 27.73834874000022,
+      "tts_queue_wait_s": 6.700471491996723,
+      "tts_http_wall_s": 6.147776578000048,
+      "tts_engine_elapsed_s": 2.7873353958129883,
+      "tts_audio_duration_s": 3.111473922902494,
+      "tts_rtf": 0.8958247650081098,
+      "tts_output": "parallel_runs/wavs_20260611_214158/tts_002_1781185340577.wav",
+      "tts_played": true
+    },
+    {
+      "index": 3,
+      "text": "绿色标记显示多个监控点位分布情况。",
+      "chars": 17,
+      "qwen_sentence_ready_s": 16.584894892999728,
+      "tts_start_s": 27.73850011199829,
+      "tts_done_s": 33.174059728997236,
+      "tts_queue_wait_s": 11.153605218998564,
+      "tts_http_wall_s": 5.4351646680006525,
+      "tts_engine_elapsed_s": 2.2267630100250244,
+      "tts_audio_duration_s": 2.9257142857142857,
+      "tts_rtf": 0.761100638192147,
+      "tts_output": "parallel_runs/wavs_20260611_214158/tts_003_1781185346725.wav",
+      "tts_played": true
+    },
+    {
+      "index": 4,
+      "text": "地面平坦开阔，无明显建筑或车辆活动。",
+      "chars": 18,
+      "qwen_sentence_ready_s": 18.565211627996177,
+      "tts_start_s": 33.17421022599592,
+      "tts_done_s": 39.53847122099978,
+      "tts_queue_wait_s": 14.608998597999744,
+      "tts_http_wall_s": 6.363805588000105,
+      "tts_engine_elapsed_s": 2.648859977722168,
+      "tts_audio_duration_s": 3.4481632653061225,
+      "tts_rtf": 0.7681944774407329,
+      "tts_output": "parallel_runs/wavs_20260611_214158/tts_004_1781185352161.wav",
+      "tts_played": true
+    },
+    {
+      "index": 5,
+      "text": "右下角标注“东三I线”，左上角显示日期时间。",
+      "chars": 22,
+      "qwen_sentence_ready_s": 22.029709845999605,
+      "tts_start_s": 39.5386622579972,
+      "tts_done_s": 46.39038224199612,
+      "tts_queue_wait_s": 17.508952411997598,
+      "tts_http_wall_s": 6.850607008003863,
+      "tts_engine_elapsed_s": 2.9904980659484863,
+      "tts_audio_duration_s": 3.553106575963719,
+      "tts_rtf": 0.8416572939800898,
+      "tts_output": "parallel_runs/wavs_20260611_214158/tts_005_1781185358526.wav",
+      "tts_played": true
+    }
+  ]
+}
