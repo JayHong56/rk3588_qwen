@@ -1,0 +1,21 @@
+# ===== Model files =====
+*.onnx
+*.rknn
+*.rkllm
+*.tar.gz
+*.zip
+*.whl
+*.so
+*.wav
+
+# ===== Downloaded assets / models =====
+offline_assets/
+tts/models/
+tts/piper_data/
+tts/piper_fast_frontend/
+tts/torch_only_site/
+
+# ===== Generated audio recordings =====
+tts/recorded_timeline_runs/
+tts/review_audio/
+tts/sherpa_fast_verify/

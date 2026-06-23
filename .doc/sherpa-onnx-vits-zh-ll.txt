@@ -1,0 +1,2515 @@
+╭─── Claude Code v2.1.153 ─────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│                    Welcome back!                   │ started                 │
+│                                                    │ Run /init to create a … │
+│                       ▐▛███▜▌                      │ ─────────────────────── │
+│                      ▝▜█████▛▘                     │ What's new              │
+│                        ▘▘ ▝▝                       │ Session titles are now… │
+│                                                    │ Added `footerLinksRege… │
+│        deepseek-v4-pro · API Usage Billing         │ Improved Bedrock crede… │
+│  ~/…/tts/02_rk3588_sherpa_onnx_tts_deploy_project  │ /release-notes for more │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+❯ 回顾对话：/home/linaro/agent_workspace/conversation-2026-06-12-203341.txt     
+
+  Thought for 11s, read 1 file (ctrl+o to expand)
+
+● 我已经仔细阅读了整个对话记录。以下是完整回顾：
+
+  ---
+  对话回顾
+
+  背景
+
+  你在 RK3588 上部署了 Qwen3-VL 4B（NPU 推理），并搭建了 TTS
+  语音播报桥接系统，目标是实现低延迟的语音助手交互。
+
+  时间线
+
+  1. MeloTTS 阶段 — Qwen + MeloTTS 语音桥接，解决编码/JSON/依赖问题，优化到 ~1s
+  合成。但 MeloTTS-RKNN2 decoder 与 Qwen3-VL 抢 NPU，并行时冲突。
+  2. Sherpa-onnx 阶段 — 换 sherpa-onnx（纯 CPU），端口 8011，实现边生成边播 +
+  profiling + 录音时间轴。
+  3. ZipVoice 阶段 — 追求多音色/语音克隆，换 ZipVoice ONNX，端口 8012。但 RTF
+  1.4-5.2，长句 23s+，太慢。
+  4. Piper 阶段（当前） — 换 Piper ONNX (zh_CN-xiao_ya-medium)，RTF 0.68，纯
+  CPU。花大量精力解决中文依赖（g2pw/torch/pypinyin shim）。
+
+  最终实现
+
+  - 交互脚本：/home/linaro/Qwen/scripts/23_interactive_piper_persistent_qwen.py
+    - Qwen 常驻 + Piper 8011 端口
+    - 两级流水线：synth_worker（合成队列）→ play_worker（播放队列）
+    - 播放第 1 句时后台合成第 2 句
+
+  最后解决的问题：首句延迟
+
+  问题：首句合成+播报需要 ~9s，其中 Piper subprocess 冷启动占 ~2.5s。
+
+  根因：piper_tts_engine.py 每次 /synthesize 都用 subprocess.run(piper 
+  CLI)，每次重新启动进程、import torch/onnxruntime/g2pw、加载 63MB ONNX 模型。
+
+  修复（对话末尾刚完成）：
+
+  文件: app/piper_tts_engine.py
+  改动: 新增 PersistentPiperEngine，用 PiperVoice.load() + synthesize_wav()
+    常驻推理，单次合成从 ~2.5s → ~0.7s；旧 subprocess 实现保留为 fallback，通过
+    PIPER_BACKEND 切换
+  ────────────────────────────────────────
+  文件: app/sherpa_tts_server.py
+  改动: 改用工厂函数 create_piper_engine()
+  ────────────────────────────────────────
+  文件: config/sherpa_tts.env
+  改动: 新增 PIPER_BACKEND=persistent
+
+  待执行：在 RK3588 上重启 8011 服务即可生效。
+
+  ---
+  需要我继续做什么？比如：
+  - 验证修改后的文件当前状态
+  - 在 RK3588 上重启服务测试
+  - 进一步优化 pipeline 的其他环节
+
+✻ Brewed for 19s
+
+❯ 上次都修改了哪些文件                                                          
+
+  Thought for 4s (ctrl+o to expand)
+
+● 根据对话记录，上次（持久化 Piper 引擎优化）修改了 3 个文件：
+
+  #: 1
+  文件: app/piper_tts_engine.py
+  改动: 新增 PersistentPiperEngine 类（PiperVoice.load() 常驻加载），旧
+    PiperTtsEngine 保留为 subprocess fallback，新增 create_piper_engine()
+    工厂函数
+  ────────────────────────────────────────
+  #: 2
+  文件: app/sherpa_tts_server.py
+  改动: 导入从 PiperTtsEngine 改为 create_piper_engine，调用改为工厂函数
+  ────────────────────────────────────────
+  #: 3
+  文件: config/sherpa_tts.env
+  改动: 新增 PIPER_BACKEND=persistent
+
+  实际代码改动范围：piper_tts_engine.py 是大改（新增 ~145 行），另外两个文件各改
+   1 行。
+
+  要我看一下这些文件当前的内容确认改动已落地吗？
+
+✻ Baked for 6s
+
+※ recap: 正在把 Piper TTS 从每次冷启动子进程改为常驻引擎，减少首句延迟约 2-3 秒。代码已改完（3 个文件），下一步在 RK3588 上重启 8011 服务测试效果。 (disable recaps in /config)
+
+❯ 我刚才恢复了git版本，回退到修改前的版本了，请再帮我进行修改                   
+
+  Thought for 2s (ctrl+o to expand)
+
+● 先看一下当前三个文件的状态。
+
+  Thought for 2s, read 3 files (ctrl+o to expand)
+
+● 确认，三个文件都已回退。现在重新应用修改。
+
+● Write(app/piper_tts_engine.py)
+  ⎿  Added 146 lines, removed 7 lines
+      1  import os
+      2  import subprocess
+      3 +import sys                                                      
+      4  import time
+      5 +import wave                                                     
+      6  from dataclasses import dataclass
+      7  from pathlib import Path
+      8  from typing import Optional
+     ...
+      16      + "/home/linaro/Qwen/tts/torch_only_site"
+      17  )
+      18  
+      19 +# ── sys.path bootstrap for persistent engine ─────────────────
+         +────────────                                                   
+      20 +# The TTS service process may not have torch / fast-frontend on
+         + its                                                           
+      21 +# default sys.path.  Inject them once at import time so that   
+      22 +# ``import piper.voice`` can resolve g2pw→pypinyin, torch, etc.
+      23 +for _entry in DEFAULT_PIPER_EXTRA_PYTHONPATH.split(os.pathsep):
+      24 +    _entry = _entry.strip()                                    
+      25 +    if _entry and _entry not in sys.path:                      
+      26 +        sys.path.insert(0, _entry)                             
+      27  
+      28 +                                                               
+      29  @dataclass
+      30  class PiperTtsConfig:
+      31      model: str
+     ...
+       64      return float(value) if value else None
+       65  
+       66  
+       67 +# ════════════════════════════════════════════════════════════
+          +═══════════════                                               
+       68 +#  Persistent engine  – loads PiperVoice once, reuses across r
+          +equests                                                       
+       69 +# ════════════════════════════════════════════════════════════
+          +═══════════════                                               
+       70 +                                                              
+       71 +class PersistentPiperEngine:                                  
+       72 +    """Piper TTS engine that keeps the ONNX model loaded in-pr
+          +ocess.                                                        
+       73 +                                                              
+       74 +    Uses the ``piper.voice.PiperVoice`` Python API so that mod
+          +el                                                            
+       75 +    loading happens **once** at service startup instead of ins
+          +ide a                                                         
+       76 +    new subprocess for every ``/synthesize`` call.            
+       77 +    """                                                       
+       78 +                                                              
+       79 +    def __init__(self, cfg: PiperTtsConfig):                  
+       80 +        self.cfg = cfg                                        
+       81 +        self.model = Path(cfg.model)                          
+       82 +        self.config = Path(cfg.config)                        
+       83 +        if not self.model.exists():                           
+       84 +            raise FileNotFoundError(f"missing Piper model: {se
+          +lf.model}")                                                   
+       85 +        if not self.config.exists():                          
+       86 +            raise FileNotFoundError(f"missing Piper config: {s
+          +elf.config}")                                                 
+       87 +                                                              
+       88 +        # Ensure g2pW data dir exists (unused with fast fronte
+          +nd, but safe)                                                 
+       89 +        if cfg.data_dir:                                      
+       90 +            Path(cfg.data_dir).mkdir(parents=True, exist_ok=Tr
+          +ue)                                                           
+       91 +                                                              
+       92 +        # ── load ONNX model once ────────────────────────────
+          +─────────────                                                 
+       93 +        from piper.voice import PiperVoice  # noqa: E402      
+       94 +                                                              
+       95 +        t0 = time.time()                                      
+       96 +        self._voice = PiperVoice.load(                        
+       97 +            str(self.model),                                  
+       98 +            str(self.config),                                 
+       99 +            use_cuda=False,                                   
+      100 +            download_dir=str(Path(cfg.data_dir)) if cfg.data_d
+          +ir else None,                                                 
+      101 +        )                                                     
+      102 +        _LOGGER.info("PersistentPiperEngine loaded in %.3fs", 
+          +time.time() - t0)                                             
+      103 +                                                              
+      104 +    def synthesize(self, text: str, output: str, sid=None, spe
+          +ed=None):                                                     
+      105 +        text = (text or "").strip()                           
+      106 +        if not text:                                          
+      107 +            raise ValueError("empty text")                    
+      108 +                                                              
+      109 +        out = Path(output)                                    
+      110 +        out.parent.mkdir(parents=True, exist_ok=True)         
+      111 +                                                              
+      112 +        # ── build SynthesisConfig ───────────────────────────
+          +─────────────                                                 
+      113 +        from piper.config import SynthesisConfig  # noqa: E402
+      114 +                                                              
+      115 +        syn_cfg_kwargs = {}                                   
+      116 +                                                              
+      117 +        speaker = self.cfg.speaker if sid is None else sid    
+      118 +        if speaker is not None:                               
+      119 +            syn_cfg_kwargs["speaker_id"] = speaker            
+      120 +                                                              
+      121 +        if self.cfg.length_scale is not None:                 
+      122 +            syn_cfg_kwargs["length_scale"] = self.cfg.length_s
+          +cale                                                          
+      123 +        elif speed and speed > 0:                             
+      124 +            syn_cfg_kwargs["length_scale"] = 1.0 / float(speed
+          +)                                                             
+      125 +                                                              
+      126 +        if self.cfg.noise_scale is not None:                  
+      127 +            syn_cfg_kwargs["noise_scale"] = self.cfg.noise_sca
+          +le                                                            
+      128 +        if self.cfg.noise_w is not None:                      
+      129 +            syn_cfg_kwargs["noise_w_scale"] = self.cfg.noise_w
+      130 +                                                              
+      131 +        syn_cfg = SynthesisConfig(**syn_cfg_kwargs)           
+      132 +                                                              
+      133 +        # ── synthesize → wav ────────────────────────────────
+          +─────────────                                                 
+      134 +        start = time.time()                                   
+      135 +        with wave.open(str(out), "wb") as wf:                 
+      136 +            wf.setnchannels(1)                                
+      137 +            wf.setsampwidth(2)          # 16-bit              
+      138 +            wf.setframerate(self._voice.config.sample_rate)   
+      139 +            self._voice.synthesize_wav(text, wf, syn_config=sy
+          +n_cfg)                                                        
+      140 +        elapsed = time.time() - start                         
+      141 +                                                              
+      142 +        if not out.exists() or out.stat().st_size == 0:       
+      143 +            raise RuntimeError(f"Piper produced empty wav: {ou
+          +t}")                                                          
+      144 +                                                              
+      145 +        info = sf.info(str(out))                              
+      146 +        duration = float(info.frames) / float(info.samplerate)
+      147 +        return {                                              
+      148 +            "output": str(out),                               
+      149 +            "sample_rate": int(info.samplerate),              
+      150 +            "duration_sec": duration,                         
+      151 +            "elapsed_sec": elapsed,                           
+      152 +            "rtf": elapsed / max(duration, 1e-6),             
+      153 +            "backend": "piper-persistent",                    
+      154 +        }                                                     
+      155 +                                                              
+      156 +                                                              
+      157 +# ════════════════════════════════════════════════════════════
+          +═══════════════                                               
+      158 +#  Subprocess engine  – original implementation kept as fallba
+          +ck                                                            
+      159 +# ════════════════════════════════════════════════════════════
+          +═══════════════                                               
+      160 +                                                              
+      161  class PiperTtsEngine:
+       57 -    def __init__(self, cfg):                                  
+      162 +    """Original subprocess-based Piper backend.               
+      163 +                                                              
+      164 +    Each ``/synthesize`` call spawns a new ``piper`` CLI proce
+          +ss.                                                           
+      165 +    Kept as fallback – set ``PIPER_BACKEND=subprocess`` to use
+          +.                                                             
+      166 +    """                                                       
+      167 +                                                              
+      168 +    def __init__(self, cfg: PiperTtsConfig):                  
+      169          self.cfg = cfg
+      170          self.model = Path(cfg.model)
+      171          self.config = Path(cfg.config)
+     ...
+      198  
+      199          if self.cfg.length_scale is not None:
+      200              cmd += ["--length_scale", str(self.cfg.length_scal
+           e)]
+       90 -        elif speed and speed > 0:                             
+       91 -            # Piper length_scale is roughly inverse speed.    
+      201 +        elif speed and speed > 0 What the:                    
+      202              cmd += ["--length_scale", str(1.0 / float(speed))]
+      203  
+      204          if self.cfg.noise_scale is not None:
+     ...
+      213  
+      214          start = time.time()
+      215          env = os.environ.copy()
+      106 -        extra_pythonpath = os.environ.get("PIPER_EXTRA_PYTHONP
+          -ATH", DEFAULT_PIPER_EXTRA_PYTHONPATH).strip()                 
+      216 +        extra_pythonpath = os.environ.get(                    
+      217 +            "PIPER_EXTRA_PYTHONPATH", DEFAULT_PIPER_EXTRA_PYTH
+          +ONPATH                                                        
+      218 +        ).strip()                                             
+      219          if extra_pythonpath:
+      220              current_pythonpath = env.get("PYTHONPATH", "")
+      221              env["PYTHONPATH"] = (
+     ...
+      235          )
+      236          elapsed = time.time() - start
+      237          if proc.returncode != 0:
+      126 -            raise RuntimeError(f"Piper failed: {proc.returncod
+          -e}\n{proc.stdout[-2000:]}")                                   
+      238 +            raise RuntimeError(                               
+      239 +                f"Piper failed: {proc.returncode}\n{proc.stdou
+          +t[-2000:]}"                                                   
+      240 +            )                                                 
+      241          if not out.exists() or out.stat().st_size == 0:
+      128 -            raise RuntimeError(f"Piper did not create output w
+          -av: {out}\n{proc.stdout[-2000:]}")                            
+      242 +            raise RuntimeError(                               
+      243 +                f"Piper did not create output wav: {out}\n{pro
+          +c.stdout[-2000:]}"                                            
+      244 +            )                                                 
+      245  
+      246          info = sf.info(str(out))
+      247          duration = float(info.frames) / float(info.samplerate)
+     ...
+      251              "duration_sec": duration,
+      252              "elapsed_sec": elapsed,
+      253              "rtf": elapsed / max(duration, 1e-6),
+      138 -            "backend": "piper",                               
+      254 +            "backend": "piper-subprocess",                    
+      255          }
+      256 +                                                              
+      257 +                                                              
+      258 +# ════════════════════════════════════════════════════════════
+          +═══════════════                                               
+      259 +#  Factory                                                    
+      260 +# ════════════════════════════════════════════════════════════
+          +═══════════════                                               
+      261 +                                                              
+      262 +import logging  # noqa: E402                                  
+      263 +                                                              
+      264 +_LOGGER = logging.getLogger("piper_tts_engine")               
+      265 +                                                              
+      266 +                                                              
+      267 +def create_piper_engine(cfg: PiperTtsConfig):                 
+      268 +    """Return the right Piper engine based on ``PIPER_BACKEND`
+          +` env var.                                                    
+      269 +                                                              
+      270 +    ``persistent`` (default) – loads model once, reuses across
+          + requests.                                                    
+      271 +    ``subprocess``           – original behaviour, one process
+          + per request.                                                 
+      272 +    """                                                       
+      273 +    backend = os.environ.get("PIPER_BACKEND", "persistent").st
+          +rip().lower()                                                 
+      274 +    if backend == "subprocess":                               
+      275 +        _LOGGER.info("using subprocess Piper backend")        
+      276 +        return PiperTtsEngine(cfg)                            
+      277 +    _LOGGER.info("using persistent Piper backend")            
+      278 +    return PersistentPiperEngine(cfg)                         
+
+  Thought for 2s (ctrl+o to expand)
+
+● 有个笔误，修复一下：
+
+● Update(app/piper_tts_engine.py)
+  ⎿  Added 1 line, removed 1 line
+      198  
+      199          if self.cfg.length_scale is not None:
+      200              cmd += ["--length_scale", str(self.cfg.length_scal
+           e)]
+      201 -        elif speed and speed > 0 What the:                    
+      201 +        elif speed and speed > 0:                             
+      202              cmd += ["--length_scale", str(1.0 / float(speed))]
+      203  
+      204          if self.cfg.noise_scale is not None:
+
+● Auto mode lets Claude handle permission prompts automatically — Claude
+   checks each tool call for risky actions and prompt injection before
+  executing. Actions Claude identifies as safe are executed, while
+  actions Claude identifies as risky are blocked and Claude may try a
+  different approach. Ideal for long-running tasks. Sessions are
+  slightly more expensive. Claude can make mistakes that allow harmful
+  commands to run, it's recommended to only use in isolated
+  environments. Shift+Tab to change mode.
+
+  Thought for 2s (ctrl+o to expand)
+
+● 现在修改另外两个文件：
+
+● Update(app/sherpa_tts_server.py)
+  ⎿  Added 1 line, removed 1 line
+       4  from fastapi import FastAPI, HTTPException
+       5  from pydantic import BaseModel
+       6  from app.sherpa_tts_engine import SherpaTtsEngine, config_from_
+          env
+       7 -from app.piper_tts_engine import PiperTtsEngine, piper_config_f
+         -rom_env                                                        
+       7 +from app.piper_tts_engine import create_piper_engine, piper_con
+         +fig_from_env                                                   
+       8  from app.audio_player import play_audio
+       9  
+      10  def load_env(path):
+
+● Update(app/sherpa_tts_server.py)
+  ⎿  Added 1 line, removed 1 line
+      21      if backend in {'sherpa', 'sherpa_vits', 'vits'}:
+      22          return backend, SherpaTtsEngine(config_from_env())
+      23      if backend == 'piper':
+      24 -        return backend, PiperTtsEngine(piper_config_from_env())
+      24 +        return backend, create_piper_engine(piper_config_from_e
+         +nv())                                                          
+      25      raise RuntimeError(f'unsupported TTS_ENGINE={backend}')
+      26  
+      27  backend_name, engine = create_engine()
+
+● Update(config/sherpa_tts.env)
+  ⎿  Added 2 lines
+      16  AUDIO_PLAYER=aplay
+      17  AUDIO_DEVICE=
+      18  
+      19 +PIPER_BACKEND=persistent                                       
+      20 +                                                               
+      21  PIPER_BIN=/home/linaro/Qwen/tts/02_rk3588_sherpa_onnx_tts_deplo
+          y_project/.venv/bin/piper
+      22  PIPER_MODEL=/home/linaro/Qwen/tts/models/piper_zh_xiao_ya_mediu
+          m/zh_CN-xiao_ya-medium.onnx
+      23  PIPER_CONFIG=/home/linaro/Qwen/tts/models/piper_zh_xiao_ya_medi
+          um/zh_CN-xiao_ya-medium.onnx.json
+
+  Thought for 1s (ctrl+o to expand)
+
+● 语法检查：
+
+● Bash(cd /home/linaro/Qwen/tts/02_rk3588_sherpa_onnx_tts_deploy_project &&
+      .venv/bin/python3 -m py_compile app/piper_tts_engine.py
+      app/sherpa_tts_server.py && echo "A…)
+  ⎿  All OK
+
+  Thought for 1s (ctrl+o to expand)
+
+● 语法检查通过。三个文件已全部修改完成：
+
+  #: 1
+  文件: app/piper_tts_engine.py
+  改动: 新增 PersistentPiperEngine（常驻加载 ONNX，单次合成 ~0.7s）+
+    create_piper_engine() 工厂函数；旧 PiperTtsEngine 保留为 subprocess fallback
+  ────────────────────────────────────────
+  #: 2
+  文件: app/sherpa_tts_server.py
+  改动: 导入/调用改为 create_piper_engine
+  ────────────────────────────────────────
+  #: 3
+  文件: config/sherpa_tts.env
+  改动: 新增 PIPER_BACKEND=persistent
+
+  在 RK3588 上重启 8011 服务即可生效：
+
+  cd /home/linaro/Qwen/scripts
+  ./08_stop_sherpa_tts.sh
+  fuser -k 8011/tcp 2>/dev/null || true
+  ./00_start_sherpa_tts.sh
+
+  启动时会看到 PersistentPiperEngine loaded in ~1.3s，之后每次 /synthesize
+  只做纯推理，首句延迟可减少约 2-3 秒。
+
+✻ Crunched for 1m 4s
+
+❯ 第一句从合成到播放耗时很长：linaro@linaro-alip:~/Qwen/scripts$                
+  ./23_interactive_piper_persistent_qwen.sh                                     
+  [INFO] interactive persistent Qwen + Piper                                    
+  [INFO] TTS_API_BASE=http://127.0.0.1:8011                                     
+  [INFO] INTERACTIVE_USE_IMAGE=0                                                
+  [INFO] INTERACTIVE_SHORT_REPLY=1                                              
+  [INFO] INTERACTIVE_TTS_MAX_CHARS=28                                           
+                                                                                
+  [2026-06-12 20:50:58][TTS] health={"ok":true,"backend":"piper","model_dir":"/ 
+  home/linaro/models/vits-melo-tts-zh_en","piper_model":"/home/linaro/Qwen/tts/ 
+  models/piper_zh_xiao_ya_medium/zh_CN-xiao_ya-medium.onnx","provider":"cpu"}   
+  [2026-06-12 20:50:58][QWEN] starting persistent demo                          
+  [2026-06-12 20:50:58][QWEN-BOOT] W rkllm: Warning: Your rknpu driver version  
+  is too low, please upgrade to 0.9.7                                           
+  [2026-06-12 20:50:58][QWEN-BOOT] I rkllm: rkllm-runtime version: 1.2.3, rknpu 
+   driver version: 0.9.6, platform: RK3588                                      
+  [2026-06-12 20:50:58][QWEN-BOOT] I rkllm: loading rkllm model from            
+  ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm                                      
+  [2026-06-12 20:50:58][QWEN-BOOT] I rkllm: rkllm-toolkit version: 1.2.3,       
+  max_context_limit: 4096, npu_core_num: 3, target_platform: RK3588,            
+  model_dtype: W8A8                                                             
+  [2026-06-12 20:51:02][QWEN-BOOT] I rkllm: Enabled cpus: [4, 5, 6, 7]          
+  [2026-06-12 20:51:02][QWEN-BOOT] I rkllm: Enabled cpus num: 4                 
+  [2026-06-12 20:51:02][QWEN-BOOT] I rkllm: Using mrope                         
+  [2026-06-12 20:51:08][QWEN] waiting ready... elapsed=10s                      
+  [2026-06-12 20:51:09][QWEN-BOOT] rkllm init success                           
+  [2026-06-12 20:51:09][QWEN-BOOT] main: LLM Model loaded in  4558.32 ms        
+  [2026-06-12 20:51:09][QWEN-BOOT] ===the core num is 3===                      
+  [2026-06-12 20:51:09][QWEN-BOOT] model input num: 1, output num: 4            
+  [2026-06-12 20:51:09][QWEN-BOOT] input tensors:                               
+  [2026-06-12 20:51:09][QWEN-BOOT] index=0, name=pixel, n_dims=4, dims=[1, 448, 
+   448, 3], n_elems=602112, size=1204224, fmt=NHWC, type=FP16, qnt_type=AFFINE, 
+   zp=0, scale=1.000000                                                         
+  [2026-06-12 20:51:09][QWEN-BOOT] output tensors:                              
+  [2026-06-12 20:51:09][QWEN-BOOT] index=0, name=4820, n_dims=2, dims=[196,     
+  2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16,          
+  qnt_type=AFFINE, zp=0, scale=1.000000                                         
+  [2026-06-12 20:51:09][QWEN-BOOT] index=1, name=1669, n_dims=2, dims=[196,     
+  2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16,          
+  qnt_type=AFFINE, zp=0, scale=1.000000                                         
+  [2026-06-12 20:51:09][QWEN-BOOT] index=2, name=2720, n_dims=2, dims=[196,     
+  2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16,          
+  qnt_type=AFFINE, zp=0, scale=1.000000                                         
+  [2026-06-12 20:51:09][QWEN-BOOT] index=3, name=3771, n_dims=2, dims=[196,     
+  2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16,          
+  qnt_type=AFFINE, zp=0, scale=1.000000                                         
+  [2026-06-12 20:51:09][QWEN-BOOT] model input height=448, width=448, channel=3 
+  [2026-06-12 20:51:09][QWEN-BOOT] main: ImgEnc Model loaded in  3911.19 ms     
+  [2026-06-12 20:51:09][QWEN-BOOT] main: ImgEnc Model inference took  2275.78   
+  ms                                                                            
+  [2026-06-12 20:51:09][QWEN-BOOT] **********************可输入以下问题对应序号 
+  获取回答/或自定义输入********************                                     
+  [2026-06-12 20:51:09][QWEN] ready                                             
+  交互式常驻 Qwen3-VL + Piper 已启动。输入 exit / quit / q / 退出 结束。        
+  流水线模式：Qwen 输出句子后立即合成，上一句播放时下一句继续合成。             
+  默认不会自动加 <image>；需要看图时，用 INTERACTIVE_USE_IMAGE=1                
+  启动，或直接在问题里写 <image>。                                              
+  你：你好                                                                      
+  助手：[2026-06-12 20:51:14][QWEN-OUT] robot:                                  
+  [2026-06-12 20:51:14][QWEN-OUT] 你好                                          
+  [2026-06-12 20:51:14][QWEN-OUT] ！                                            
+  ！                                                                            
+  [2026-06-12 20:51:15][QWEN-OUT] 有什么                                        
+  有什么                                                                        
+  [2026-06-12 20:51:15][QWEN-OUT] 问题                                          
+  问题                                                                          
+  [2026-06-12 20:51:15][QWEN-OUT] 我可以                                        
+  我可以                                                                        
+  [2026-06-12 20:51:15][QWEN-OUT] 帮你                                          
+  帮你                                                                          
+  [2026-06-12 20:51:16][QWEN-OUT] 解答                                          
+  解答                                                                          
+  [2026-06-12 20:51:16][QWEN-OUT] 。                                            
+  。                                                                            
+  [2026-06-12 20:51:16][SYNTH] start idx=1 chars=13                             
+  text=有什么问题我可以帮你解答。                                               
+  [2026-06-12 20:51:16][QWEN-OUT] 随时                                          
+  随时                                                                          
+  [2026-06-12 20:51:16][QWEN-OUT] 欢迎                                          
+  欢迎                                                                          
+  [2026-06-12 20:51:17][QWEN-OUT] 提问                                          
+  提问                                                                          
+  [2026-06-12 20:51:17][QWEN-OUT] ，                                            
+  ，                                                                            
+  [2026-06-12 20:51:17][QWEN-OUT] 我会                                          
+  我会                                                                          
+  [2026-06-12 20:51:17][QWEN-OUT] 尽力                                          
+  尽力                                                                          
+  [2026-06-12 20:51:17][QWEN-OUT] 提供                                          
+  提供                                                                          
+  [2026-06-12 20:51:18][QWEN-OUT] 帮助                                          
+  帮助                                                                          
+  [2026-06-12 20:51:18][QWEN-OUT] 。                                            
+  。                                                                            
+  [2026-06-12 20:51:18][QWEN-OUT] 祝                                            
+  祝                                                                            
+  [2026-06-12 20:51:19][QWEN-OUT] 你                                            
+  你                                                                            
+  [2026-06-12 20:51:19][QWEN-OUT] 今天                                          
+  今天                                                                          
+  [2026-06-12 20:51:19][QWEN-OUT] 愉快                                          
+  愉快                                                                          
+  [2026-06-12 20:51:19][QWEN-OUT] ，                                            
+  ，                                                                            
+  [2026-06-12 20:51:19][QWEN-OUT] 生活                                          
+  生活                                                                          
+  [2026-06-12 20:51:20][QWEN-OUT] 顺                                            
+  顺                                                                            
+  [2026-06-12 20:51:20][QWEN-OUT] 心                                            
+  心                                                                            
+  [2026-06-12 20:51:20][QWEN-OUT] ！                                            
+  ！                                                                            
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm: ------------------------------------ 
+  --------------------------------------------------                            
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm:  Model init time (ms)  3677.36       
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm: ------------------------------------ 
+  --------------------------------------------------                            
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm:  Stage         Total Time (ms)       
+  Tokens    Time per Token (ms)      Tokens per Second                          
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm: ------------------------------------ 
+  --------------------------------------------------                            
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm:  Prefill       516.97           26   
+        19.88                    50.29                                          
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm:  Generate      6100.70          28   
+        217.88                   4.59                                           
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm: ------------------------------------ 
+  --------------------------------------------------                            
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm:  Peak Memory Usage (GB)              
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm:  5.42                                
+  [2026-06-12 20:51:20][QWEN-OUT] I rkllm: ------------------------------------ 
+  --------------------------------------------------                            
+  [2026-06-12 20:51:20][QWEN-OUT] user:                                         
+                                                                                
+  [2026-06-12 20:51:21][SYNTH] done idx=1 status=200 elapsed=5.577s             
+  wav=/tmp/piper_interactive_1781268676249_1.wav                                
+  [2026-06-12 20:51:21][SYNTH] start idx=2 chars=16                             
+  text=随时欢迎提问，我会尽力提供帮助。                                         
+  [2026-06-12 20:51:21][PLAY] start idx=1                                       
+  wav=/tmp/piper_interactive_1781268676249_1.wav                                
+  [2026-06-12 20:51:24][SYNTH] done idx=2 status=200 elapsed=2.608s             
+  wav=/tmp/piper_interactive_1781268681826_2.wav                                
+  [2026-06-12 20:51:24][SYNTH] start idx=3 chars=12                             
+  text=祝你今天愉快，生活顺心！                                                 
+  [2026-06-12 20:51:25][PLAY] done idx=1 elapsed=3.301s                         
+  [2026-06-12 20:51:25][PLAY] start idx=2                                       
+  wav=/tmp/piper_interactive_1781268681826_2.wav                                
+  [2026-06-12 20:51:27][SYNTH] done idx=3 status=200 elapsed=2.656s             
+  wav=/tmp/piper_interactive_1781268684434_3.wav                                
+  [2026-06-12 20:51:28][PLAY] done idx=2 elapsed=3.787s                         
+  [2026-06-12 20:51:28][PLAY] start idx=3                                       
+  wav=/tmp/piper_interactive_1781268684434_3.wav                                
+  [2026-06-12 20:51:31][PLAY] done idx=3 elapsed=3.044s                         
+  你：                                                                          
+
+  Thought for 28s (ctrl+o to expand)
+
+● 看到问题了。关键数据点：
+
+  [SYNTH] done idx=1 status=200 elapsed=5.577s   ← 首句合成 5.6s！
+  [SYNTH] done idx=2 status=200 elapsed=2.608s   ← 第二句 2.6s
+  [SYNTH] done idx=3 status=200 elapsed=2.656s   ← 第三句 2.7s
+
+  首句 5.6 秒说明 8011 服务还在跑旧代码（subprocess 模式）。即使我们刚改了文件，
+  运行中的服务已经把旧代码加载到内存了，不会自动重载。
+
+  让我确认一下当前服务状态和脚本逻辑：
+● Bash(fuser 8011/tcp 2>/dev/null && echo "---" && ps aux | grep -E
+      "(sherpa|uvicorn|piper)" | grep -v grep)
+  ⎿   78413---
+     root        1379  0.3  0.3 449052 54456 ?        Ssl  13:24   1:46 /ho
+     me/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/.venv/bin/py
+     … +10 lines (ctrl+o to expand)
+
+  Thought for 4s, read 1 file (ctrl+o to expand)
+
+● 找到原因了。8011 服务从 16:27
+  就在运行，早于我们修改代码的时间。旧代码（subprocess
+  模式）还加载在内存里，改文件不会自动生效。需要重启服务。
+
+  Thought for 2s, read 1 file (ctrl+o to expand)
+
+● 老服务需要重启才能加载新的 persistent 引擎。停旧服务 → 重启：
+
+● Bash(echo "[STEP 1] Killing old 8011 service (PID 78413)..." && kill 78413 &&
+      sleep 1 && echo "done")
+  ⎿  [STEP 1] Killing old 8011 service (PID 78413)...
+     done
+
+  Thought for 1s (ctrl+o to expand)
+
+● Bash(fuser -k 8011/tcp 2>/dev/null; sleep 1; echo "Port 8011 is now free:
+      $(fuser 8011/tcp 2>&1 || true)")
+  ⎿  Denied by auto mode classifier ∙ see 
+     https://code.claude.com/docs/s/claude-code-auto-mode
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(fuser 8011/tcp 2>&1 || echo "Port 8011 is free")
+  ⎿  Port 8011 is free
+
+  Thought for 2s (ctrl+o to expand)
+
+● 端口已释放。现在启动服务：
+
+● Bash(cd /home/linaro/Qwen/scripts && bash 00_start_sherpa_tts.sh)
+  ⎿  [INFO] starting sherpa-onnx TTS service...
+     [INFO] log: /home/linaro/Qwen/tts/logs/sherpa_tts_service.log
+     [INFO] waiting for TTS health... 1s
+     [OK] sherpa-onnx TTS ready: http://127.0.0.1:8011/health
+
+  Thought for 2s (ctrl+o to expand)
+
+● 服务已启动。验证 persistent 引擎是否生效：
+
+● Bash(echo "=== Health ===" && curl -s http://127.0.0.1:8011/health | python3
+      -m json.tool && echo && echo "=== Service Log (last 20 lines) ===" && tail
+       -20 /home/lin…)
+  ⎿  === Health ===
+     {
+         "ok": true,
+     … +15 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● 没看到 PersistentPiperEngine loaded
+  日志。让我确认环境变量是否被正确加载，以及引擎是否真的用了 persistent 模式：
+
+● Bash(echo "=== Test synthesize ===" && time curl -s -X POST
+      http://127.0.0.1:8011/synthesize -H 'Content-Type: application/json' -d
+      '{"text": "你好有什么问题我可以帮你解答"}' | py…)
+  ⎿  === Test synthesize ===
+     {
+         "output": "output/tts_1781268924865.wav",
+     … +10 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● persistent 引擎已生效！ 对比：
+
+  ┌──────────┬──────────────────┬──────────────────┐
+  │   指标   │ 旧 (subprocess)  │ 新 (persistent)  │
+  ├──────────┼──────────────────┼──────────────────┤
+  │ 首句合成 │ 5.577s           │ 0.947s           │
+  ├──────────┼──────────────────┼──────────────────┤
+  │ RTF      │ ~1.6             │ 0.276            │
+  ├──────────┼──────────────────┼──────────────────┤
+  │ backend  │ piper-subprocess │ piper-persistent │
+  └──────────┴──────────────────┴──────────────────┘
+
+  首句合成从 5.6 秒降到 0.95 秒，提升了近 6 
+  倍。现在你可以重新运行交互脚本测试了：
+
+  ./23_interactive_piper_persistent_qwen.sh
+
+  输入"你好"后，首句从合成到播放应该在 ~1 秒左右完成。
+
+✻ Churned for 3m 33s
+
+❯ 推荐一个Qwen的语言模型，不用vision，以部署在板子上                            
+
+  Thought for 3s (ctrl+o to expand)
+
+● Web Search("Qwen3 text-only language model RK3588 NPU rkllm deploy 2025 2026")
+  ⎿  Did 1 search in 22s
+
+  Thought for 6s (ctrl+o to expand)
+
+● 结合你的场景（RK3588 + 语音助手，不需要图像），推荐如下：
+
+  首选：Qwen3-1.7B Instruct
+
+  ┌───────────────┬────────────────────────┬────────────────────┐
+  │   对比维度    │  Qwen3-VL 4B（当前）   │ Qwen3-1.7B（推荐） │
+  ├───────────────┼────────────────────────┼────────────────────┤
+  │ 参数量        │ 4B + vision encoder    │ 1.7B（纯文本）     │
+  ├───────────────┼────────────────────────┼────────────────────┤
+  │ 内存占用      │ ~5.4GB                 │ ~3.2GB             │
+  ├───────────────┼────────────────────────┼────────────────────┤
+  │ 首 token 延迟 │ ~2.2s（vision encode） │ ~0.5s（无 vision） │
+  ├───────────────┼────────────────────────┼────────────────────┤
+  │ 生成速度      │ ~4.6 tok/s             │ ~8-10 tok/s        │
+  ├───────────────┼────────────────────────┼────────────────────┤
+  │ 中文能力      │ 强                     │ 足够对话           │
+  ├───────────────┼────────────────────────┼────────────────────┤
+  │ NPU 内存竞争  │ 与 TTS 抢占            │ 更充裕             │
+  └───────────────┴────────────────────────┴────────────────────┘
+
+  收益预估：去掉 vision encoder 直接省掉 ~2.2s
+  首句延迟，加上生成更快，你从输入"你好"到首句 TTS 合成可以从 ~9s 降到 ~3-4s。
+
+  ---
+  部署方式
+
+  你已有 RKLLM 运行环境（rkllm_qwen3vl4b），模型转换后直接复用即可。
+
+  RK3588 预转换模型已有人发布，可以直接下载使用（避免自己转换）：
+
+  ▎ HuggingFace: randomblock1/Qwen3-4B-Instruct-2507-rk3588 也有 Qwen3-1.7B 
+  ▎ 预转换版本
+
+  或者从 ModelScope 下载原始权重自己用 RKLLM 工具转换（W8A8 量化，输出约 2.4GB
+  的 .rkllm 文件）。
+
+  ---
+  次选：Qwen3-4B Instruct（纯文本）
+
+  如果担心 1.7B 能力不够，Qwen3-4B 纯文本版去掉了 vision encoder，内存占用比
+  Qwen3-VL 4B 低，首 token 延迟也能省掉 vision encode 的
+  ~2.2s。但生成速度跟现在差不多（~5 tok/s）。
+
+  ---
+  要我帮你下载 Qwen3-1.7B 的 RK3588 预转换模型，还是自己用 RKLLM 工具做转换？
+
+✻ Sautéed for 46s
+
+❯ 当前tts有抢占npu吗？                                                          
+
+  Thought for 3s (ctrl+o to expand)
+
+● Bash(echo "=== Piper 进程 ===" && ps aux | grep piper | grep -v grep && echo
+      && echo "=== 8011 服务的 ONNX 配置 ===" && cd
+      /home/linaro/Qwen/tts/02_rk3588_sherpa_onnx_tts_d…)
+  ⎿  === Piper 进程 ===
+     linaro    118499  0.1  0.1 180660 23532 pts/9    Sl+  20:55   0:00 /ho
+     me/linaro/Qwen/tts/03_rk3588_qwen35_sherpa_onnx_voice_bridge_project/.
+     … +24 lines (ctrl+o to expand)
+  Thought for 3s (ctrl+o to expand)
+
+● 不抢占。 Piper TTS 完全跑在 CPU 上：
+
+  ┌────────────────────────┬─────────────────────────────────────────────────┐
+  │          证据          │                      结论                       │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ ONNX Runtime providers │ 只有 CPUExecutionProvider，无 RKNN/NPU provider │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ 8011 进程加载的 NPU 库 │ 无（rknpu/rknn/galcore 均未加载）               │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ SHERPA_PROVIDER=cpu    │ 明确配置为 CPU 推理                             │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ TTS_ENGINE=piper       │ Piper ONNX 纯 CPU，不碰 NPU                     │
+  └────────────────────────┴─────────────────────────────────────────────────┘
+
+  NPU 只被 Qwen3-VL 占用。当前架构下两者不冲突：
+
+  NPU: ─── Qwen3-VL 4B ──────── (独占)
+  CPU: ─── Piper TTS ────────── (纯 CPU, RTF 0.28)
+
+  这和之前 MeloTTS-RKNN2 的情况不同——那时 MeloTTS 也要抢 NPU，才换成了现在的
+  Piper。现在 NPU 资源是干净的，TTS 不是延迟瓶颈。
+
+✻ Baked for 26s
+
+❯ 当前输出的最大token是多少？为什么生成就两句话，用这个脚本的话/home/linaro/Qwe 
+  n/scripts/23_interactive_piper_persistent_qwen.sh                             
+
+  Thought for 10s, read 1 file (ctrl+o to expand)
+
+● 两个原因都在代码里：
+
+  1. 最大 token：4096
+
+  # 第 193-194 行
+  cmd = [
+      "./demo", IMAGE, VISION_MODEL, LLM_MODEL,
+      "256",    # max_context_len
+      "4096",   # max_new_tokens  ← 这里
+      ...
+  ]
+
+  日志也印证了：max_context_limit: 4096。
+
+  2. 为什么只生成 2-3 句话：INTERACTIVE_SHORT_REPLY=1
+
+  脚本第 14 行默认开启：
+  export INTERACTIVE_SHORT_REPLY="${INTERACTIVE_SHORT_REPLY:-1}"
+
+  然后在 Python 第 264-265 行，每次提问自动追加简短指令：
+  if os.environ.get("INTERACTIVE_SHORT_REPLY", "1").lower() in {"1", "true",
+  "yes", "on"}:
+      send_prompt += " 请简短回答，最多三句话，每句话不超过二十个字。"
+
+  这是之前为了降低 TTS 延迟加的，现在 Piper
+  常驻后合成已经很快（~0.95s/句），不再需要这个限制了。
+
+  ---
+  改法
+
+  去掉简短限制即可：
+
+  INTERACTIVE_SHORT_REPLY=0 ./23_interactive_piper_persistent_qwen.sh
+
+  或者改脚本默认值，把第 5 行的 1 改成 0：
+
+  export INTERACTIVE_SHORT_REPLY="${INTERACTIVE_SHORT_REPLY:-0}"
+
+  要我把脚本默认值改掉吗？
+
+✻ Cogitated for 14s
+
+❯ 将其改掉                                                                      
+
+  Thought for 1s (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.sh)
+  ⎿  Added 1 line, removed 1 line
+      2  set -euo pipefail
+      3  
+      4  export TTS_API_BASE="${TTS_API_BASE:-http://127.0.0.1:8011}"
+      5 -export INTERACTIVE_SHORT_REPLY="${INTERACTIVE_SHORT_REPLY:-1}"  
+      5 +export INTERACTIVE_SHORT_REPLY="${INTERACTIVE_SHORT_REPLY:-0}"  
+      6  export INTERACTIVE_TTS_MAX_CHARS="${INTERACTIVE_TTS_MAX_CHARS:-2
+         8}"
+      7  export INTERACTIVE_USE_IMAGE="${INTERACTIVE_USE_IMAGE:-0}"
+      8  
+
+  Thought for 2s (ctrl+o to expand)
+
+● 已改。现在默认为 0，Qwen
+  不会再被强制简短回答。如果临时需要简短模式，手动指定即可：
+
+  INTERACTIVE_SHORT_REPLY=1 ./23_interactive_piper_persistent_qwen.sh
+
+✻ Churned for 5s
+
+❯ 再找一找有没有其他参数影响我的输出                                            
+
+  Thought for 12s, searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● 找到所有影响输出的参数，逐一分析：
+
+  Thought for 18s, listed 1 directory (ctrl+o to expand)
+
+● 找到 5 个影响输出的参数，按影响程度排序：
+
+  ---
+  🔴 影响最大的参数
+
+  1. IMAGE + VISION_MODEL（第 190-191 行）— 每次启动强制加载视觉模型
+
+  IMAGE = "/home/linaro/test.jpg"         # 总是传一个 dummy 图片
+  VISION_MODEL = "./qwen3-vl_vision_rk3588.rknn"  # 总是加载视觉 encoder
+
+  即使用 INTERACTIVE_USE_IMAGE=0 不发起图片提问，demo 仍然加载视觉模型并推理 
+  dummy 图片，日志证实：
+
+  [QWEN-BOOT] ImgEnc Model loaded in  3911.19 ms      ← 3.9s 加载
+  [QWEN-BOOT] ImgEnc Model inference took  2275.78 ms ← 2.3s 推理
+
+  每次启动浪费 ~6.2 秒。而且 Qwen3-VL 4B 本身比纯文本 Qwen3-4B
+  多视觉参数，生成速度也被拖慢（~4.6 tok/s vs 纯文本版预计 ~6-8
+  tok/s）。这是之前建议换 Qwen3-1.7B 纯文本的核心原因。
+
+  ---
+  2. INTERACTIVE_SHORT_REPLY（第 264 行）— ✅ 已修复
+
+  已从 1 改为 0，不再强制追加"简短回答"。
+
+  ---
+  🟡 影响较小的参数
+
+  3. INTERACTIVE_TTS_MAX_CHARS = 28（第 108 行）
+
+  max_chars = int(os.environ.get("INTERACTIVE_TTS_MAX_CHARS", "28"))
+  if ch in "。！？!?；;\n" or len(buf) >= max_chars:  # 超 28 字强制切句
+
+  这不影响 Qwen 生成内容，但影响 TTS
+  如何切句。切太短可能导致句子不完整。可以调到 40-50：
+
+  INTERACTIVE_TTS_MAX_CHARS=40 ./23_interactive_piper_persistent_qwen.sh
+
+  4. 空闲超时 8 秒（第 278 行）
+
+  if started and time.time() - last_output > 8:
+      break  # 输出停止 8 秒就切断
+
+  如果 Qwen 生成长回复时偶尔卡顿超过 8 秒，会被截断。长回复场景可适当放宽。
+
+  5. max_new_tokens = 4096（第 194 行）
+
+  生成上限 4096 token，这个足够用，不会造成输出过短。
+
+  ---
+  总结
+
+  ┌────────────────────────┬──────────────────────────────┬────────────────┐
+  │          参数          │             影响             │      状态      │
+  ├────────────────────────┼──────────────────────────────┼────────────────┤
+  │ IMAGE + VISION_MODEL   │ 强制加载视觉模型，拖慢启动+  │ 需要换纯文本模 │
+  │                        │ 生成                         │ 型             │
+  ├────────────────────────┼──────────────────────────────┼────────────────┤
+  │ INTERACTIVE_SHORT_REPL │ 强制简短回答                 │ ✅ 已修复      │
+  │ Y                      │                              │                │
+  ├────────────────────────┼──────────────────────────────┼────────────────┤
+  │ INTERACTIVE_TTS_MAX_CH │ 限制 TTS 切句长度            │ 可调大         │
+  │ ARS                    │                              │                │
+  ├────────────────────────┼──────────────────────────────┼────────────────┤
+  │ 8s 空闲超时            │ 长回复可能被截断             │ 可按需改       │
+  ├────────────────────────┼──────────────────────────────┼────────────────┤
+  │ max_new_tokens=4096    │ 足够，无影响                 │ ✅             │
+  └────────────────────────┴──────────────────────────────┴────────────────┘
+
+  最根本的改进是换纯文本 Qwen3 模型，省掉视觉 encoder 加载和推理的
+  ~6s，同时提升生成速度。要继续推进这个吗？
+
+✻ Crunched for 57s
+
+❯ 如果我现在不需要视觉，                                                        
+
+  Thought for 6s (ctrl+o to expand)
+
+● 看看有没有纯文本的 demo，或者能不能跳过视觉 encoder：
+
+  Thought for 4s, listed 1 directory (ctrl+o to expand)
+
+● Bash(echo "=== rkllm_qwen25 目录结构 ===" && ls -la /home/linaro/rkllm_qwen25/
+       && echo && echo "=== llm_demo 信息 ===" && file
+      /home/linaro/rkllm_qwen25/llm_demo && echo &…)
+  ⎿  === rkllm_qwen25 目录结构 ===
+     总用量 3582824
+     drwxr-xr-x  7 linaro linaro       4096  6月  2 12:39 .
+     … +27 lines (ctrl+o to expand)
+
+  Thought for 4s (ctrl+o to expand)
+
+● 找到了！你已经有 Qwen2.5-1.5B 纯文本 模型和 demo：
+
+  Listed 1 directory (ctrl+o to expand)
+
+❯ 我现在想给Qwen换个模型，Qwen/rkllm_qwen3_8b已经拷贝进来了pc生成的文件，现在帮 
+  我进行修改我的桥接配置，并且能够使用参数进行Qwen3 VL 和Qwen3 的切换           
+
+  Thought for 10s, listed 1 directory (ctrl+o to expand)
+
+● Bash(echo "=== llm_demo 用法 ===" &&
+      LD_LIBRARY_PATH=/home/linaro/rkllm_qwen25/lib:$LD_LIBRARY_PATH
+      /home/linaro/rkllm_qwen25/llm_demo 2>&1 | head -5 && echo && echo "…)
+  ⎿  === llm_demo 用法 ===
+     Usage: /home/linaro/rkllm_qwen25/llm_demo model_path max_new_tokens ma
+     x_context_len
+     … +24 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● 目录不存在，搜一下实际位置：
+
+  Thought for 8s, searched for 1 pattern, listed 1 directory (ctrl+o to expand)
+
+● 找到了。现在来了解两个 demo 的接口差异，然后改造脚本：
+
+● Bash(echo "=== llm_demo 参数 ===" && strings
+      /home/linaro/Qwen/rkllm_qwen3_8b/llm_demo | grep -i
+      "usage\|model\|token\|max\|context\|prompt" | head -20 && echo && echo…)  ⎿  === llm_demo 参数 ===
+     Usage:
+      model_path max_new_tokens max_context_len
+     … +18 lines (ctrl+o to expand)
+
+  Thought for 13s (ctrl+o to expand)
+
+● 清楚了。两个 demo 接口完全不同：
+
+  ┌────────┬─────────────────────────────────┬──────────────────────────────┐
+  │        │             VL demo             │      llm_demo（纯文本）      │
+  ├────────┼─────────────────────────────────┼──────────────────────────────┤
+  │ 二进制 │ ./demo                          │ ./llm_demo                   │
+  ├────────┼─────────────────────────────────┼──────────────────────────────┤
+  │ 参数   │ image, vision_model, llm_model, │ 只 3 个：model, max_tokens,  │
+  │        │  ... + vision tokens            │ context_len                  │
+  ├────────┼─────────────────────────────────┼──────────────────────────────┤
+  │ 视觉   │ 每次加载 vision encoder         │ 零视觉                       │
+  └────────┴─────────────────────────────────┴──────────────────────────────┘
+
+  现在改造脚本，加入 QWEN_MODEL_BACKEND 切换参数：
+
+  Thought for 2s, read 1 file (ctrl+o to expand)
+
+● 现在开始修改。先改 Python 脚本，加入双后端切换：
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 16 lines, removed 4 lines
+      12  
+      13  import requests
+      14  
+      15 +# ── backend selection ────────────────────────────────────────
+         +────────────                                                   
+      16 +# QWEN_MODEL_BACKEND=vl   → Qwen3-VL 4B  (vision-language, ./de
+         +mo)                                                            
+      17 +# QWEN_MODEL_BACKEND=text → Qwen3 8B      (text-only,     ./llm
+         +_demo)                                                         
+      18 +QWEN_BACKEND = os.environ.get("QWEN_MODEL_BACKEND", "vl").strip
+         +().lower()                                                     
+      19 +assert QWEN_BACKEND in {"vl", "text"}, f"unsupported QWEN_MODEL
+         +_BACKEND={QWEN_BACKEND}"                                       
+      20  
+      16 -DEMO_DIR = Path("/home/linaro/rkllm_qwen3vl4b/demo_Linux_aarch6
+         -4")                                                            
+      17 -IMAGE = "/home/linaro/test.jpg"                                
+      18 -VISION_MODEL = "./qwen3-vl_vision_rk3588.rknn"                 
+      19 -LLM_MODEL = "./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm"         
+      21 +if QWEN_BACKEND == "text":                                     
+      22 +    DEMO_DIR   = Path("/home/linaro/Qwen/rkllm_qwen3_8b")      
+      23 +    DEMO_BIN   = "./llm_demo"                                  
+      24 +    LLM_MODEL  = "./Qwen3-8B_W8A8_RK3588.rkllm"                
+      25 +else:                                                          
+      26 +    DEMO_DIR   = Path("/home/linaro/rkllm_qwen3vl4b/demo_Linux_
+         +aarch64")                                                      
+      27 +    DEMO_BIN   = "./demo"                                      
+      28 +    IMAGE      = "/home/linaro/test.jpg"                       
+      29 +    VISION_MODEL = "./qwen3-vl_vision_rk3588.rknn"             
+      30 +    LLM_MODEL  = "./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm"    
+      31 +                                                               
+      32  TTS_API_BASE = os.environ.get("TTS_API_BASE", "http://127.0.0.1
+          :8011").rstrip("/")
+      33  STOP = object()
+      34  
+
+  Thought for 1s (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 23 lines, removed 13 lines
+      197          env = os.environ.copy()
+      198          env["LD_LIBRARY_PATH"] = str(DEMO_DIR / "lib") + ":" +
+            env.get("LD_LIBRARY_PATH", "")
+      199          env.setdefault("RKLLM_LOG_LEVEL", "1")
+      200 -        cmd = [                                               
+      201 -            "./demo",                                         
+      202 -            IMAGE,                                            
+      203 -            VISION_MODEL,                                     
+      204 -            LLM_MODEL,                                        
+      205 -            "256",                                            
+      206 -            "4096",                                           
+      207 -            "3",                                              
+      208 -            "<|vision_start|>",                               
+      209 -            "<|vision_end|>",                                 
+      210 -            "<|image_pad|>",                                  
+      211 -        ]                                                     
+      212 -        log("QWEN", "starting persistent demo")               
+      200 +                                                              
+      201 +        if QWEN_BACKEND == "text":                            
+      202 +            cmd = [                                           
+      203 +                DEMO_BIN,                                     
+      204 +                LLM_MODEL,                                    
+      205 +                "4096",   # max_new_tokens                    
+      206 +                "256",    # max_context_len                   
+      207 +            ]                                                 
+      208 +        else:                                                 
+      209 +            cmd = [                                           
+      210 +                DEMO_BIN,                                     
+      211 +                IMAGE,                                        
+      212 +                VISION_MODEL,                                 
+      213 +                LLM_MODEL,                                    
+      214 +                "256",                                        
+      215 +                "4096",                                       
+      216 +                "3",                                          
+      217 +                "<|vision_start|>",                           
+      218 +                "<|vision_end|>",                             
+      219 +                "<|image_pad|>",                              
+      220 +            ]                                                 
+      221 +                                                              
+      222 +        log("QWEN", f"starting persistent demo (backend={QWEN_
+          +BACKEND})")                                                   
+      223          self.proc = subprocess.Popen(
+      224              cmd,
+      225              cwd=str(DEMO_DIR),
+
+  Thought for 1s (ctrl+o to expand)
+
+● 更新启动提示信息：
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 6 lines, removed 2 lines
+      347      play_th.start()
+      348      qwen = PersistentQwen()
+      349  
+      350 -    print("交互式常驻 Qwen3-VL + Piper 已启动。输入 exit / qui
+          -t / q / 退出 结束。")                                         
+      350 +    if QWEN_BACKEND == "text":                                
+      351 +        print("交互式常驻 Qwen3-8B (text-only) + Piper 已启动 
+          +。输入 exit / quit / q / 退出 结束。")                        
+      352 +    else:                                                     
+      353 +        print("交互式常驻 Qwen3-VL 4B + Piper 已启动。输入 exi
+          +t / quit / q / 退出 结束。")                                  
+      354      print("流水线模式：Qwen 输出句子后立即合成，上一句播放时下
+           一句继续合成。")
+      352 -    print("默认不会自动加 <image>；需要看图时，用 INTERACTIVE_
+          -USE_IMAGE=1 启动，或直接在问题里写 <image>。")                
+      355 +    if QWEN_BACKEND == "vl":                                  
+      356 +        print("默认不会自动加 <image>；需要看图时，用 INTERACT
+          +IVE_USE_IMAGE=1 启动，或直接在问题里写 <image>。")            
+      357      try:
+      358          while True:
+      359              prompt = input("你：").strip()
+
+  Thought for 1s (ctrl+o to expand)
+
+● 现在改 shell 包装脚本，加入 QWEN_MODEL_BACKEND 参数：
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.sh)
+  ⎿  Added 2 lines
+      1  #!/usr/bin/env bash
+      2  set -euo pipefail
+      3  
+      4 +export QWEN_MODEL_BACKEND="${QWEN_MODEL_BACKEND:-vl}"           
+      5  export TTS_API_BASE="${TTS_API_BASE:-http://127.0.0.1:8011}"
+      6  export INTERACTIVE_SHORT_REPLY="${INTERACTIVE_SHORT_REPLY:-0}"
+      7  export INTERACTIVE_TTS_MAX_CHARS="${INTERACTIVE_TTS_MAX_CHARS:-2
+         8}"
+     ...
+      13  fi
+      14  
+      15  echo "[INFO] interactive persistent Qwen + Piper"
+      16 +echo "[INFO] QWEN_MODEL_BACKEND=$QWEN_MODEL_BACKEND"           
+      17  echo "[INFO] TTS_API_BASE=$TTS_API_BASE"
+      18  echo "[INFO] INTERACTIVE_USE_IMAGE=$INTERACTIVE_USE_IMAGE"
+      19  echo "[INFO] INTERACTIVE_SHORT_REPLY=$INTERACTIVE_SHORT_REPLY"
+
+  Thought for 1s (ctrl+o to expand)
+
+● 语法检查：
+
+● Bash(tts/03_rk3588_qwen35_sherpa_onnx_voice_bridge_project/.venv/bin/python -m
+       py_compile scripts/23_interactive_piper_persistent_qwen.py && echo
+      "Python OK" && bash…)
+  ⎿  Python OK
+     Bash OK
+
+  Thought for 1s (ctrl+o to expand)
+
+● 全部通过。最后确认关键部分：
+
+● Bash(echo "=== Python: backend config ===" && sed -n '1,30p'
+      /home/linaro/Qwen/scripts/23_interactive_piper_persistent_qwen.py && echo
+      "..." && echo "=== Python: cmd…)
+  ⎿  === Python: backend config ===
+     #!/usr/bin/env python3
+     import os
+     … +92 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● 改造完成。3 个文件修改汇总：
+
+  ---
+  修改内容
+
+  1. 23_interactive_piper_persistent_qwen.sh
+
+  新增 QWEN_MODEL_BACKEND 环境变量，默认 vl
+
+  2. 23_interactive_piper_persistent_qwen.py
+
+  根据 QWEN_MODEL_BACKEND 自动选择后端：
+
+  ┌──────────┬────────────────────────────────────┬─────────────────────────┐
+  │          │   QWEN_MODEL_BACKEND=vl（默认）    │ QWEN_MODEL_BACKEND=text │
+  ├──────────┼────────────────────────────────────┼─────────────────────────┤
+  │ Demo     │ ./demo                             │ ./llm_demo              │
+  ├──────────┼────────────────────────────────────┼─────────────────────────┤
+  │ 目录     │ rkllm_qwen3vl4b/demo_Linux_aarch64 │ Qwen/rkllm_qwen3_8b     │
+  ├──────────┼────────────────────────────────────┼─────────────────────────┤
+  │ 模型     │ Qwen3-VL 4B                        │ Qwen3 8B                │
+  ├──────────┼────────────────────────────────────┼─────────────────────────┤
+  │ 视觉参数 │ image + vision model + tokens      │ 无需，零视觉            │
+  ├──────────┼────────────────────────────────────┼─────────────────────────┤
+  │ 启动耗时 │ ~10s（含 vision encode）           │ ~3-4s（仅 LLM 加载）    │
+  └──────────┴────────────────────────────────────┴─────────────────────────┘
+
+  ---
+  使用方式
+
+  # Qwen3-8B 纯文本（推荐，无视觉开销）
+  QWEN_MODEL_BACKEND=text ./23_interactive_piper_persistent_qwen.sh
+
+  # Qwen3-VL 4B（默认，需要视觉时用）
+  ./23_interactive_piper_persistent_qwen.sh
+
+  ---
+  ⚠️ 注意
+
+  Qwen3-8B 模型文件 8.3GB，你的 RK3588 内存可能装不下。如果启动时 OOM
+  报错，可以换 Qwen3-1.7B（~2.4GB，rkllm_qwen25 目录已有 Qwen2.5-1.5B）或
+  Qwen3-4B 纯文本版。要不要先试跑一下看看能不能加载？
+
+✻ Brewed for 1m 28s
+
+❯ linaro@linaro-alip:~/Qwen/scripts$ QWEN_MODEL_BACKEND=text                    
+  linaro@linaro-alip:~/Qwen/scripts$ ./23_interactive_piper_persistent_qwen.sh  
+  [INFO] interactive persistent Qwen + Piper                                    
+  [INFO] QWEN_MODEL_BACKEND=vl                                                  
+  [INFO] TTS_API_BASE=http://127.0.0.1:8011                                     
+  [INFO] INTERACTIVE_USE_IMAGE=0                                                
+  [INFO] INTERACTIVE_SHORT_REPLY=0                                              
+  [INFO] INTERACTIVE_TTS_MAX_CHARS=28                                           
+                                                                                
+  [2026-06-13 14:29:09][TTS] health={"ok":true,"backend":"piper","model_dir":"/ 
+  home/linaro/models/vits-melo-tts-zh_en","piper_model":"/home/linaro/Qwen/tts/ 
+  models/piper_zh_xiao_ya_medium/zh_CN-xiao_ya-medium.onnx","provider":"cpu"}   
+  [2026-06-13 14:29:09][QWEN] starting persistent demo (backend=vl)             
+  [2026-06-13 14:29:09][QWEN-BOOT] W rkllm: Warning: Your rknpu driver version  
+  is too low, please upgrade to 0.9.7                                           
+  [2026-06-13 14:29:09][QWEN-BOOT] I rkllm: rkllm-runtime version: 1.2.3, rknpu 
+   driver version: 0.9.6, platform: RK3588                                      
+  [2026-06-13 14:29:09][QWEN-BOOT] I rkllm: loading rkllm model from            
+  ./qwen3-vl-4b-instruct_w8a8_rk3588.rkllm                                      
+  [2026-06-13 14:29:10][QWEN-BOOT] I rkllm: rkllm-toolkit version: 1.2.3,       
+  max_context_limit: 4096, npu_core_num: 3, target_platform: RK3588,            
+  model_dtype: W8A8                                                             
+  [2026-06-13 14:29:19][QWEN] waiting ready... elapsed=10s                      
+  [2026-06-13 14:29:27][QWEN-BOOT] I rkllm: Enabled cpus: [4, 5, 6, 7]          
+  [2026-06-13 14:29:27][QWEN-BOOT] I rkllm: Enabled cpus num: 4                 
+  [2026-06-13 14:29:27][QWEN-BOOT] I rkllm: Using mrope                         
+  [2026-06-13 14:29:30][QWEN] waiting ready... elapsed=20s                      
+  [2026-06-13 14:29:33][QWEN-BOOT] rkllm init success                           
+  [2026-06-13 14:29:33][QWEN-BOOT] main: LLM Model loaded in 17927.65 ms        
+  [2026-06-13 14:29:33][QWEN-BOOT] ===the core num is 3===                      
+  [2026-06-13 14:29:33][QWEN-BOOT] model input num: 1, output num: 4            
+  [2026-06-13 14:29:33][QWEN-BOOT] input tensors:                               
+  [2026-06-13 14:29:33][QWEN-BOOT] index=0, name=pixel, n_dims=4, dims=[1, 448, 
+   448, 3], n_elems=602112, size=1204224, fmt=NHWC, type=FP16, qnt_type=AFFINE, 
+   zp=0, scale=1.000000                                                         
+  [2026-06-13 14:29:33][QWEN-BOOT] output tensors:                              
+  [2026-06-13 14:29:33][QWEN-BOOT] index=0, name=4820, n_dims=2, dims=[196,     
+  2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16,          
+  qnt_type=AFFINE, zp=0, scale=1.000000                                         
+  [2026-06-13 14:29:33][QWEN-BOOT] index=1, name=1669, n_dims=2, dims=[196,     
+  2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16,          
+  qnt_type=AFFINE, zp=0, scale=1.000000                                         
+  [2026-06-13 14:29:33][QWEN-BOOT] index=2, name=2720, n_dims=2, dims=[196,     
+  2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16,          
+  qnt_type=AFFINE, zp=0, scale=1.000000                                         
+  [2026-06-13 14:29:33][QWEN-BOOT] index=3, name=3771, n_dims=2, dims=[196,     
+  2560, 0, 0], n_elems=501760, size=1003520, fmt=UNDEFINED, type=FP16,          
+  qnt_type=AFFINE, zp=0, scale=1.000000                                         
+  [2026-06-13 14:29:33][QWEN-BOOT] model input height=448, width=448, channel=3 
+  [2026-06-13 14:29:33][QWEN-BOOT] main: ImgEnc Model loaded in  3807.34 ms     
+  [2026-06-13 14:29:33][QWEN-BOOT] main: ImgEnc Model inference took  2257.14   
+  ms                                                                            
+  [2026-06-13 14:29:33][QWEN-BOOT] **********************可输入以下问题对应序号 
+  获取回答/或自定义输入********************                                     
+  [2026-06-13 14:29:33][QWEN] ready                                             
+  交互式常驻 Qwen3-VL 4B + Piper 已启动。输入 exit / quit / q / 退出 结束。     
+  流水线模式：Qwen 输出句子后立即合成，上一句播放时下一句继续合成。             
+  默认不会自动加 <image>；需要看图时，用 INTERACTIVE_USE_IMAGE=1                
+  启动，或直接在问题里写 <image>。                                              
+  你：你好 怎么还显示是4B                                                       
+
+  Thought for 5s (ctrl+o to expand)
+
+● 因为你把它写成了两行：
+
+  QWEN_MODEL_BACKEND=text          # ← 这只是 shell 变量，不会传给子进程
+  ./23_interactive_piper_persistent_qwen.sh   # ← 脚本读不到
+
+  要写成 一行：
+
+  QWEN_MODEL_BACKEND=text ./23_interactive_piper_persistent_qwen.sh
+
+  或者先 export：
+
+  export QWEN_MODEL_BACKEND=text
+  ./23_interactive_piper_persistent_qwen.sh
+
+✻ Cogitated for 6s
+
+❯ /home/linaro/Qwen/rk3588_qwen3_4b_bundle.tar.gz 我现在要将Qwen从Qwen3.0 8B    
+  换成Qwen3.0 4B，这是其打包好的文件，请将原来的8B删除，并适配一下4B            
+
+  Thought for 3s (ctrl+o to expand)
+
+● Bash(echo "=== 4B 包内容 ===" && tar tzf
+      /home/linaro/Qwen/rk3588_qwen3_4b_bundle.tar.gz | head -30 && echo && echo
+       "=== 当前 8B 目录 ===" && ls -lah /home/linaro/Qwen/rkll…)
+  ⎿  === 4B 包内容 ===
+     rk3588_qwen3_4b_bundle/
+     rk3588_qwen3_4b_bundle/llm_demo
+     … +12 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● 4B 是纯文本模型，结构同 8B。开始操作：
+
+● Bash(echo "=== 解压 4B 包 ===" && tar xzf
+      /home/linaro/Qwen/rk3588_qwen3_4b_bundle.tar.gz -C /home/linaro/Qwen/ &&
+      mv /home/linaro/Qwen/rk3588_qwen3_4b_bundle /home/lin…)  ⎿  === 解压 4B 包 ===
+     === 4B 内容 ===
+     总用量 4.6G
+     … +6 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● 4B 模型 4.6GB（8B 的一半）。删除 8B，更新配置：
+
+● Bash(rm -rf /home/linaro/Qwen/rkllm_qwen3_8b && echo "8B deleted" && ls -d
+      /home/linaro/Qwen/rkllm_qwen3_* 2>/dev/null)
+  ⎿  8B deleted
+     /home/linaro/Qwen/rkllm_qwen3_4b
+
+  Thought for 1s (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 2 lines, removed 2 lines
+      19  assert QWEN_BACKEND in {"vl", "text"}, f"unsupported QWEN_MODEL
+          _BACKEND={QWEN_BACKEND}"
+      20  
+      21  if QWEN_BACKEND == "text":
+      22 -    DEMO_DIR   = Path("/home/linaro/Qwen/rkllm_qwen3_8b")      
+      22 +    DEMO_DIR   = Path("/home/linaro/Qwen/rkllm_qwen3_4b")      
+      23      DEMO_BIN   = "./llm_demo"
+      24 -    LLM_MODEL  = "./Qwen3-8B_W8A8_RK3588.rkllm"                
+      24 +    LLM_MODEL  = "./Qwen3-4B_W8A8_RK3588.rkllm"                
+      25  else:
+      26      DEMO_DIR   = Path("/home/linaro/rkllm_qwen3vl4b/demo_Linux_
+          aarch64")
+      27      DEMO_BIN   = "./demo"
+
+  Thought for 2s (ctrl+o to expand)
+
+● 更新启动提示文字：
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 1 line, removed 1 line
+      348      qwen = PersistentQwen()
+      349  
+      350      if QWEN_BACKEND == "text":
+      351 -        print("交互式常驻 Qwen3-8B (text-only) + Piper 已启动 
+          -。输入 exit / quit / q / 退出 结束。")                        
+      351 +        print("交互式常驻 Qwen3-4B (text-only) + Piper 已启动 
+          +。输入 exit / quit / q / 退出 结束。")                        
+      352      else:
+      353          print("交互式常驻 Qwen3-VL 4B + Piper 已启动。输入 exi
+           t / quit / q / 退出 结束。")
+      354      print("流水线模式：Qwen 输出句子后立即合成，上一句播放时下
+           一句继续合成。")
+
+  Thought for 1s (ctrl+o to expand)
+
+● Bash(tts/03_rk3588_qwen35_sherpa_onnx_voice_bridge_project/.venv/bin/python -m
+       py_compile scripts/23_interactive_piper_persistent_qwen.py && echo "OK")
+  ⎿  OK
+
+  Thought for 1s (ctrl+o to expand)
+
+● 完成。变更汇总：
+
+  ┌──────┬───────────────────────────────────────────────────────────────────┐
+  │ 操作 │                               详情                                │
+  ├──────┼───────────────────────────────────────────────────────────────────┤
+  │ 解压 │ rk3588_qwen3_4b_bundle.tar.gz → /home/linaro/Qwen/rkllm_qwen3_4b/ │
+  ├──────┼───────────────────────────────────────────────────────────────────┤
+  │ 删除 │ /home/linaro/Qwen/rkllm_qwen3_8b/（8.3GB）                        │
+  ├──────┼───────────────────────────────────────────────────────────────────┤
+  │ 替换 │ Qwen3-8B_W8A8_RK3588.rkllm → Qwen3-4B_W8A8_RK3588.rkllm（4.6GB）  │
+  └──────┴───────────────────────────────────────────────────────────────────┘
+
+  用法不变：
+
+  QWEN_MODEL_BACKEND=text ./23_interactive_piper_persistent_qwen.sh
+
+✻ Crunched for 2m 35s
+
+❯ 帮我改成默认Qwen3.0 4B                                                        
+
+  Thought for 1s (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.sh)
+  ⎿  Added 1 line, removed 1 line
+      1  #!/usr/bin/env bash
+      2  set -euo pipefail
+      3  
+      4 -export QWEN_MODEL_BACKEND="${QWEN_MODEL_BACKEND:-vl}"           
+      4 +export QWEN_MODEL_BACKEND="${QWEN_MODEL_BACKEND:-text}"         
+      5  export TTS_API_BASE="${TTS_API_BASE:-http://127.0.0.1:8011}"
+      6  export INTERACTIVE_SHORT_REPLY="${INTERACTIVE_SHORT_REPLY:-0}"
+      7  export INTERACTIVE_TTS_MAX_CHARS="${INTERACTIVE_TTS_MAX_CHARS:-2
+         8}"
+
+  Thought for 3s (ctrl+o to expand)
+
+● 同步改 Python 的默认值：
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 1 line, removed 1 line
+      15  # ── backend selection ────────────────────────────────────────
+          ────────────
+      16  # QWEN_MODEL_BACKEND=vl   → Qwen3-VL 4B  (vision-language, ./de
+          mo)
+      17  # QWEN_MODEL_BACKEND=text → Qwen3 8B      (text-only,     ./llm
+          _demo)
+      18 -QWEN_BACKEND = os.environ.get("QWEN_MODEL_BACKEND", "vl").strip
+         -().lower()                                                     
+      18 +QWEN_BACKEND = os.environ.get("QWEN_MODEL_BACKEND", "text").str
+         +ip().lower()                                                   
+      19  assert QWEN_BACKEND in {"vl", "text"}, f"unsupported QWEN_MODEL
+          _BACKEND={QWEN_BACKEND}"
+      20  
+      21  if QWEN_BACKEND == "text":
+
+● 搞定。现在默认 QWEN_MODEL_BACKEND=text（Qwen3-4B）。直接跑即可：
+
+  ./23_interactive_piper_persistent_qwen.sh
+
+  需要 VL 时再切：QWEN_MODEL_BACKEND=vl 
+  ./23_interactive_piper_persistent_qwen.sh
+
+✻ Cogitated for 10s
+
+❯                                                                               
+  [2026-06-13 19:00:54][SYNTH] done idx=1 status=200 elapsed=0.638s             
+  wav=/tmp/piper_interactive_1781348453735_1.wav                                
+  [2026-06-13 19:00:54][SYNTH] start idx=2 chars=1 text=😊                      
+  [2026-06-13 19:00:54][PLAY] start idx=1                                       
+  wav=/tmp/piper_interactive_1781348453735_1.wav                                
+  [2026-06-13 19:00:54][SYNTH] done idx=2 status=200 elapsed=0.007s             
+  wav=/tmp/piper_interactive_1781348454374_2.wav                                
+  [2026-06-13 19:00:58][PLAY] done idx=1 elapsed=4.146s                         
+  [2026-06-13 19:00:58][PLAY] start idx=2                                       
+  wav=/tmp/piper_interactive_1781348454374_2.wav                                
+  [2026-06-13 19:00:58][PLAY] done idx=2 elapsed=0.035s                         
+  你：讲个历史典故                                                              
+  助手：[2026-06-13 19:01:10][QWEN-OUT] robot:                                  
+  [2026-06-13 19:01:10][QWEN-OUT] 当然                                          
+  当然                                                                          
+  [2026-06-13 19:01:10][QWEN-OUT] 可以                                          
+  可以                                                                          
+  [2026-06-13 19:01:10][QWEN-OUT] ！                                            
+  ！                                                                            
+  [2026-06-13 19:01:10][SYNTH] start idx=1 chars=5 text=当然可以！              
+  [2026-06-13 19:01:10][QWEN-OUT] 这里                                          
+  这里                                                                          
+  [2026-06-13 19:01:10][SYNTH] done idx=1 status=200 elapsed=0.347s             
+  wav=/tmp/piper_interactive_1781348470595_1.wav                                
+  [2026-06-13 19:01:10][PLAY] start idx=1                                       
+  wav=/tmp/piper_interactive_1781348470595_1.wav                                
+  [2026-06-13 19:01:10][QWEN-OUT] 有一个                                        
+  有一个                                                                        
+  [2026-06-13 19:01:11][QWEN-OUT] 经典                                          
+  经典                                                                          
+  [2026-06-13 19:01:11][QWEN-OUT] 的历史                                        
+  的历史                                                                        
+  [2026-06-13 19:01:11][QWEN-OUT] 典                                            
+  典                                                                            
+  [2026-06-13 19:01:11][QWEN-OUT] 故                                            
+  故                                                                            
+  [2026-06-13 19:01:11][QWEN-OUT] ，                                            
+  ，                                                                            
+  [2026-06-13 19:01:12][QWEN-OUT] 来自                                          
+  来自                                                                          
+  [2026-06-13 19:01:12][QWEN-OUT] 中国古代                                      
+  中国古代                                                                      
+  [2026-06-13 19:01:12][QWEN-OUT] 的                                            
+  的                                                                            
+  [2026-06-13 19:01:12][PLAY] done idx=1 elapsed=1.655s                         
+  [2026-06-13 19:01:12][QWEN-OUT] “                                             
+  “                                                                             
+  [2026-06-13 19:01:12][QWEN-OUT] 卧                                            
+  卧                                                                            
+  [2026-06-13 19:01:12][QWEN-OUT] 薪                                            
+  薪                                                                            
+  [2026-06-13 19:01:13][QWEN-OUT] 尝                                            
+  尝                                                                            
+  [2026-06-13 19:01:13][QWEN-OUT] 胆                                            
+  胆                                                                            
+  [2026-06-13 19:01:13][QWEN-OUT] ”                                             
+  ”                                                                             
+  [2026-06-13 19:01:13][QWEN-OUT] 故事                                          
+  故事                                                                          
+  [2026-06-13 19:01:13][SYNTH] start idx=2 chars=28                             
+  text=这里有一个经典的历史典故，来自中国古代的“卧薪尝胆”故事                   
+  [2026-06-13 19:01:13][QWEN-OUT] ：                                            
+  ： 这里我想让tts把“这里有一个经典的历史典故，来自中国古代的“卧薪尝胆”故事”断  
+  成两个句子，不然这样等待播报时间太长                                          
+
+  Thought for 10s (ctrl+o to expand)
+
+● 问题是 split_sentences 的断句标点没包含中文逗号 ，。把 ， 加入断句标点即可：
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 1 line, removed 1 line
+      120      max_chars = int(os.environ.get("INTERACTIVE_TTS_MAX_CHARS"
+           , "28"))
+      121      for ch in text:
+      122          buf += ch
+      123 -        if ch in "。！？!?；;\n" or len(buf) >= max_chars:    
+      123 +        if ch in "。！？!?；;，：、\n" or len(buf) >= max_char
+          +s:                                                            
+      124              s = buf.strip()
+      125              if len(s) >= 4:
+      126                  out.append(s)
+
+  Thought for 3s (ctrl+o to expand)
+
+● 已改。现在断句标点包含了中文逗号 ， ： 、，之前那条长句会变成：
+
+  句子1: "这里有一个经典的历史典故，" （12字，~1.5s 音频）
+  句子2: "来自中国古代的"卧薪尝胆"故事" （16字，~2s 音频）
+
+  不再等到 28 字才强制切断。直接重跑即可测试：
+
+  ./23_interactive_piper_persistent_qwen.sh
+
+✻ Sautéed for 17s
+
+※ recap: Build a low-latency voice assistant on RK3588. Switched to Qwen3-4B text-only + Piper TTS, default in `23_interactive_piper_persistent_qwen.sh`. Just fixed comma splitting for shorter TTS chunks. Run `./23_interactive_piper_persistent_qwen.sh` to test. (disable recaps in /config)
+
+❯ 如果我想使用sherpa来作为tts后端，怎么做，请熟悉我/home/linaro/Qwen/tts和/home 
+  /linaro/Qwen/scripts下的文件，之前有过实现，并且还要将我当前tts的流水化保持不 
+  变                                                                            
+
+  Thought for 2s (ctrl+o to expand)
+● Explore(Explore TTS codebase structure)
+  ⎿  Done (52 tool uses · 60.4k tokens · 1m 26s)
+  (ctrl+o to expand)
+
+  Thought for 6s (ctrl+o to expand)
+
+● 探索结果非常明确。流水线代码不需要任何改动 — 两个后端共享完全相同的 API
+  接口。下面写计划：
+
+● Updated plan
+  ⎿  /plan to preview
+
+  Thought for 1s (ctrl+o to expand)
+
+● User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/misty-jumping-scott.md · /plan to edit
+     把 TTS 后端从 Piper 切换到 Sherpa-onnx VITS
+
+     背景
+
+     当前 8011 TTS 服务使用 Piper 后端（TTS_ENGINE=piper），用户想切换到
+     Sherpa-onnx VITS 后端以获得更好的中文语音质量。Sherpa-onnx VITS
+     模型已就绪（/home/linaro/models/vits-melo-tts-zh_en/，162MB ONNX + lexicon
+     + tokens + FST 规则）。
+
+     关键发现：零代码改动
+
+     两个后端通过同一 FastAPI 服务 (sherpa_tts_server.py) 暴露完全相同的 API：
+     - GET /health — 返回后端信息
+     - POST /synthesize — {"text":..., "output":..., "sid":..., "speed":...} →
+     返回 WAV 元数据
+     - POST /speak — 合成 + 可选播放
+
+     23_interactive_piper_persistent_qwen.py 只调用 /synthesize 端点，不依赖任何
+      Piper 特定逻辑。无需修改流水线代码。
+
+     改动计划
+
+     1. 修改 config/sherpa_tts.env
+
+     将 TTS_ENGINE=piper 改为 TTS_ENGINE=sherpa_vits，恢复 sherpa 模型路径：
+
+     TTS_ENGINE=sherpa_vits
+     SHERPA_MODEL_DIR=/home/linaro/models/vits-melo-tts-zh_en
+     SHERPA_VITS_MODEL=model.onnx
+     SHERPA_VITS_LEXICON=lexicon.txt
+     SHERPA_VITS_TOKENS=tokens.txt
+     SHERPA_RULE_FSTS=date.fst,number.fst
+     SHERPA_PROVIDER=cpu
+     SHERPA_NUM_THREADS=4
+     SHERPA_SID=0
+     SHERPA_SPEED=1.0
+
+     2. 重启 8011 服务
+
+     cd /home/linaro/Qwen/scripts
+     ./08_stop_sherpa_tts.sh
+     fuser -k 8011/tcp 2>/dev/null || true
+     ./00_start_sherpa_tts.sh
+
+     验证
+
+     - 启动日志应显示 using sherpa engine（而非 using persistent Piper backend）
+     - curl -s http://127.0.0.1:8011/health | python3 -m json.tool 返回
+     "backend":"sherpa_vits"
+     - 跑交互脚本 ./23_interactive_piper_persistent_qwen.sh，确认 TTS 播报正常
+
+  Thought for 2s (ctrl+o to expand)
+
+● 开始执行。先读当前配置，然后改 TTS_ENGINE：
+
+  Thought for 2s, read 1 file (ctrl+o to expand)
+
+● Sherpa 模型配置本就有了，只改一行：
+
+● Update(config/sherpa_tts.env)
+  ⎿  Added 1 line, removed 1 line
+      1 -TTS_ENGINE=piper                                                
+      1 +TTS_ENGINE=sherpa_vits                                          
+      2  
+      3  SHERPA_MODEL_DIR=/home/linaro/models/vits-melo-tts-zh_en
+      4  SHERPA_MODEL_URL=https://github.com/k2-fsa/sherpa-onnx/releases/
+         download/tts-models/vits-melo-tts-zh_en.tar.bz2
+
+  Thought for 2s (ctrl+o to expand)
+
+● 重启服务：
+
+● Bash(cd /home/linaro/Qwen/scripts && echo "=== 停旧服务 ===" && bash
+      08_stop_sherpa_tts.sh 2>&1 || true && sleep 1 && echo && echo "===
+      确认端口释放 ===" && fuser 8011/tcp 2>&…)
+  ⎿  === 停旧服务 ===
+     [INFO] stopping sherpa TTS pid=118308
+     [INFO] stopping process on 8011 pid=118308
+     … +4 lines (ctrl+o to expand)
+
+● Bash(bash 00_start_sherpa_tts.sh)
+  ⎿  [INFO] starting sherpa-onnx TTS service...
+     [INFO] log: /home/linaro/Qwen/tts/logs/sherpa_tts_service.log
+     [INFO] waiting for TTS health... 1s
+     … +2 lines (ctrl+o to expand)
+
+  Thought for 1s (ctrl+o to expand)
+
+● 验证切换成功：
+
+● Bash(echo "=== Health ===" && curl -s http://127.0.0.1:8011/health | python3
+      -m json.tool && echo && echo "=== 快速合成测试 ===" && curl -s -X POST
+      http://127.0.0.1:8011/s…)
+  ⎿  === Health ===
+     {
+         "ok": true,
+     … +25 lines (ctrl+o to expand)
+
+  Thought for 3s (ctrl+o to expand)
+
+● 切换完成。验证通过：
+
+  ┌──────────┬──────────────────┬────────────────────┐
+  │   指标   │   之前 (Piper)   │ 现在 (Sherpa VITS) │
+  ├──────────┼──────────────────┼────────────────────┤
+  │ backend  │ piper-persistent │ sherpa_vits        │
+  ├──────────┼──────────────────┼────────────────────┤
+  │ 采样率   │ 22050 Hz         │ 44100 Hz           │
+  ├──────────┼──────────────────┼────────────────────┤
+  │ 合成耗时 │ ~0.64s           │ ~0.74s             │
+  ├──────────┼──────────────────┼────────────────────┤
+  │ RTF      │ ~0.28            │ ~0.84              │
+  └──────────┴──────────────────┴────────────────────┘
+
+  流水线代码零改动 — 23_interactive_piper_persistent_qwen.py 继续通过 POST 
+  /synthesize 调用，API 完全兼容。直接跑即可：
+
+  ./23_interactive_piper_persistent_qwen.sh
+
+✻ Crunched for 2m 25s
+
+❯ /context 
+  ⎿  Context Usage
+     ⛁ ⛁ ⛁ ⛀ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   deepseek-v4-pro[1M]
+     ⛁ ⛁ ⛁ ⛀ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   114.1k/1m tokens (11%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ 
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   Estimated usage by category
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ System prompt: 5.9k tokens (0.6%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ System tools: 12.7k tokens (1.3%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ Skills: 4k tokens (0.4%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ Messages: 92.5k tokens (9.3%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛶ Free space: 884.9k (88.5%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ 
+
+     Skills · /skills
+
+     Plugin (nature-skills)
+     ├ nature-polishing: ~350 tokens
+     ├ nature-paper2ppt: ~340 tokens
+     ├ nature-figure: ~330 tokens
+     ├ nature-citation: ~330 tokens
+     ├ nature-data: ~290 tokens
+     ├ nature-reader: ~270 tokens
+     ├ nature-reviewer: ~260 tokens
+     ├ nature-response: ~240 tokens
+     ├ nature-academic-search: ~230 tokens
+     └ nature-writing: ~210 tokens
+
+     Built-in
+     ├ claude-api: ~250 tokens
+     ├ update-config: ~240 tokens
+     ├ run: ~120 tokens
+     ├ code-review: ~120 tokens
+     ├ loop: ~100 tokens
+     ├ verify: ~90 tokens
+     ├ keybindings-help: ~80 tokens
+     ├ fewer-permission-prompts: ~60 tokens
+     ├ simplify: ~30 tokens
+     ├ security-review: ~30 tokens
+     ├ init: ~20 tokens
+     └ review: < 20 tokens
+
+❯                                                                               
+  [2026-06-13 19:12:34][SYNTH] done idx=1 status=200 elapsed=1.488s             
+  wav=/tmp/piper_interactive_1781349153035_1.wav                                
+  [2026-06-13 19:12:34][SYNTH] start idx=2 chars=1 text=😊                      
+  [2026-06-13 19:12:34][PLAY] start idx=1                                       
+  wav=/tmp/piper_interactive_1781349153035_1.wav                                
+  [2026-06-13 19:12:34][SYNTH] done idx=2 status=500 elapsed=0.015s             
+  wav=/tmp/piper_interactive_1781349154523_2.wav                                
+  [2026-06-13 19:12:34][SYNTH-ERROR] HTTPError('500 Server Error: Internal      
+  Server Error for url: http://127.0.0.1:8011/synthesize')                      
+  [2026-06-13 19:12:36][PLAY] done idx=1 elapsed=1.913s                         
+  你：                                                                          
+
+  Thought for 34s (ctrl+o to expand)
+
+● 问题是 Qwen 输出的 emoji 😊 被送进 TTS，Sherpa 无法合成 emoji 所以报
+  500。在文本处理阶段把 emoji 和纯标点过滤掉：
+
+  Thought for 3s, read 1 file (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 21 lines
+      114      return s
+      115  
+      116  
+      117 +# Emoji ranges and symbols that TTS cannot speak              
+      118 +_UNSPEAKABLE_RE = re.compile(                                 
+      119 +    r"^[\U0001F300-\U0001FAFF"    # misc symbols, emoji       
+      120 +    r"\U0001F600-\U0001F64F"      # emoticons                 
+      121 +    r"\U0001F680-\U0001F6FF"      # transport                 
+      122 +    r"\U0001F900-\U0001F9FF"      # supplemental symbols      
+      123 +    r"☀-➿"               # misc symbols                      
+      124 +    r"✀-➿"               # dingbats                          
+      125 +    r"︀-"               # variation selectors                  
+      126 +    r"\U0001F1E0-\U0001F1FF"      # flags                     
+      127 +    r"‍"                      # ZWJ                            
+      128 +    r"️"                      # variation selector-16          
+      129 +    r"\s\p{P}]+$", re.UNICODE                                 
+      130 +)                                                             
+      131 +                                                              
+      132 +                                                              
+      133 +def is_speakable(text):                                       
+      134 +    """Return True if text contains at least one CJK or alphan
+          +umeric character."""                                          
+      135 +    return bool(re.search(r"[一-鿿㐀-䶿a-zA-Z0-9]", text))    
+      136 +                                                              
+      137 +                                                              
+      138  def split_sentences(text):
+      139      out = []
+      140      buf = ""
+
+  Thought for 4s (ctrl+o to expand)
+
+● 简化 — 只用 is_speakable 检查是否有可朗读内容：
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Removed 16 lines
+      114      return s
+      115  
+      116  
+      117 -# Emoji ranges and symbols that TTS cannot speak              
+      118 -_UNSPEAKABLE_RE = re.compile(                                 
+      119 -    r"^[\U0001F300-\U0001FAFF"    # misc symbols, emoji       
+      120 -    r"\U0001F600-\U0001F64F"      # emoticons                 
+      121 -    r"\U0001F680-\U0001F6FF"      # transport                 
+      122 -    r"\U0001F900-\U0001F9FF"      # supplemental symbols      
+      123 -    r"☀-➿"               # misc symbols                      
+      124 -    r"✀-➿"               # dingbats                          
+      125 -    r"︀-"               # variation selectors                  
+      126 -    r"\U0001F1E0-\U0001F1FF"      # flags                     
+      127 -    r"‍"                      # ZWJ                            
+      128 -    r"️"                      # variation selector-16          
+      129 -    r"\s\p{P}]+$", re.UNICODE                                 
+      130 -)                                                             
+      131 -                                                              
+      132 -                                                              
+      117  def is_speakable(text):
+      118      """Return True if text contains at least one CJK or alphan
+           umeric character."""
+      119      return bool(re.search(r"[一-鿿㐀-䶿a-zA-Z0-9]", text))
+
+  Thought for 1s (ctrl+o to expand)
+
+● 在 main 循环中加过滤，emoji/纯标点不进 TTS 队列：
+
+  Thought for 2s, read 1 file (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Error editing file
+
+  Thought for 8s, read 1 file (ctrl+o to expand)
+
+● Bash(sed -n '376,381p'
+      /home/linaro/Qwen/scripts/23_interactive_piper_persistent_qwen.py | cat
+      -A)
+  ⎿                  for s in ready:$
+                         idx += 1$
+                         synth_q.put((idx, s))$
+     … +3 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 6 lines, removed 4 lines
+      374                  pending += part
+      375                  ready, pending = split_sentences(pending)
+      376                  for s in ready:
+      377 -                    idx += 1                                  
+      378 -                    synth_q.put((idx, s))                     
+      377 +                    if is_speakable(s):                       
+      378 +                        idx += 1                              
+      379 +                        synth_q.put((idx, s))                 
+      380              if pending.strip():
+      380 -                idx += 1                                      
+      381 -                synth_q.put((idx, pending.strip()))           
+      381 +                if is_speakable(pending):                     
+      382 +                    idx += 1                                  
+      383 +                    synth_q.put((idx, pending.strip()))       
+      384              print()
+      385              synth_q.join()
+      386              play_q.join()
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(tts/03_rk3588_qwen35_sherpa_onnx_voice_bridge_project/.venv/bin/python -m
+       py_compile scripts/23_interactive_piper_persistent_qwen.py && echo "OK")
+  ⎿  OK
+
+● 已修复。加了 is_speakable() 检查 — 只包含 emoji/纯标点/纯符号的文本不会送入
+  TTS，避免 Sherpa 500 报错。
+
+✻ Cooked for 1m 15s
+
+❯ 为什么我的sherpa不如piper播报快                                               
+
+  Thought for 31s, called codegraph (ctrl+o to expand)
+
+● 两个原因，都是模型级别的差异：
+
+  Sherpa VITS vs Piper 对比
+
+  ┌──────────┬───────────────┬────────────────────────┐
+  │          │ Piper（63MB） │  Sherpa VITS（162MB）  │
+  ├──────────┼───────────────┼────────────────────────┤
+  │ 模型大小 │ 63MB          │ 162MB（2.6x）          │
+  ├──────────┼───────────────┼────────────────────────┤
+  │ 采样率   │ 22.05kHz      │ 44.1kHz（2x 数据量）   │
+  ├──────────┼───────────────┼────────────────────────┤
+  │ 文本前端 │ 轻量 pypinyin │ 词典(6.5MB) + FST 规则 │
+  ├──────────┼───────────────┼────────────────────────┤
+  │ RTF      │ 0.28          │ 0.84                   │
+  └──────────┴───────────────┴────────────────────────┘
+
+  Sherpa 每生成 1 秒音频，要计算 2.6x 参数 × 2x 采样点 = 5 
+  倍运算量。慢是模型本身决定的，不是工程问题。
+
+  ---
+  想加速的话
+
+  调快语速，模型会少生成音频样本，自然更快：
+
+  Thought for 4s, read 1 file (ctrl+o to expand)
+
+● SHERPA_SPEED=1.0（默认）可以调高，语速加快 → 音频时长缩短 → 计算量减少：
+
+  # 试 1.3 倍速
+  sed -i 's/SHERPA_SPEED=1.0/SHERPA_SPEED=1.3/' config/sherpa_tts.env
+  # 重启服务
+  ./08_stop_sherpa_tts.sh && ./00_start_sherpa_tts.sh
+
+  但坦白说，Sherpa (162MB, 44.1kHz) 和 Piper (63MB, 22kHz) 就是质量 vs 
+  速度的取舍：
+
+  ┌────────────┬──────────┬─────────────┐
+  │            │  Piper   │ Sherpa VITS │
+  ├────────────┼──────────┼─────────────┤
+  │ 速度       │ ★★★ 快   │ ★★☆ 中      │
+  ├────────────┼──────────┼─────────────┤
+  │ 音质       │ ★★☆ 一般 │ ★★★ 好      │
+  ├────────────┼──────────┼─────────────┤
+  │ 中文自然度 │ 机械感重 │ 更自然      │
+  └────────────┴──────────┴─────────────┘
+
+  你要速度优先就切回 Piper（TTS_ENGINE=piper），要音质优先就用
+  Sherpa。要不要我改 SHERPA_SPEED 试试，还是直接切回 Piper？
+
+✻ Cogitated for 43s
+
+❯ 我的这个.23脚本不用保存wav文件，这样会损耗一点速度                            
+
+  Thought for 18s (ctrl+o to expand)
+
+● Bash(echo "=== /tmp 是 tmpfs 吗 ===" && df -T /tmp && echo && echo "===
+      /dev/shm 呢 ===" && df -T /dev/shm && echo && echo "=== 一次合成写多少数据
+       ===" && ls -la /tmp/piper_inte…)
+  ⎿  === /tmp 是 tmpfs 吗 ===
+     文件系统       类型    1K-块     已用     可用 已用% 挂载点
+     /dev/root      ext4 65973608 44374528 18863092   71% /
+     … +16 lines (ctrl+o to expand)
+
+  Thought for 28s (ctrl+o to expand)
+
+● /tmp 是 EXT4
+  磁盘，不是内存。每次合成都写磁盘（~100-200KB/句），再读回来播放，白费 I/O。
+
+  改成纯内存流水线：TTS 引擎直接返回 PCM 字节，不写文件，管道直通 aplay。改 3
+  个文件：
+
+  Thought for 2s, read 1 file (ctrl+o to expand)
+
+● Update(app/sherpa_tts_engine.py)
+  ⎿  Added 2 lines, removed 2 lines
+      1 -import os, time, threading                                      
+      1 +import base64, os, time, threading                              
+      2  from pathlib import Path
+      3  from dataclasses import dataclass
+      4 -import sherpa_onnx, soundfile as sf                             
+      4 +import numpy as np, sherpa_onnx, soundfile as sf                
+      5  
+      6  @dataclass
+      7  class SherpaTtsConfig:
+
+  Thought for 1s (ctrl+o to expand)
+
+● Update(app/sherpa_tts_engine.py)
+  ⎿  Added 7 lines, removed 2 lines
+      24          text=(text or '').strip();
+      25          if not text: raise ValueError('empty text')
+      26          sid=self.cfg.sid if sid is None else sid; speed=self.cf
+          g.speed if speed is None else speed
+      27 -        out=Path(output); out.parent.mkdir(parents=True,exist_o
+         -k=True)                                                        
+      27          with self.lock:
+      28              st=time.time(); audio=self.tts.generate(text,sid=si
+          d,speed=speed); el=time.time()-st
+      29          if len(audio.samples)==0: raise RuntimeError('empty aud
+          io')
+      31 -        sf.write(str(out),audio.samples,audio.sample_rate); dur
+         -=len(audio.samples)/audio.sample_rate                          
+      30 +        dur=len(audio.samples)/audio.sample_rate               
+      31 +        # in-memory mode — return raw PCM, no disk             
+      32 +        if output=='__memory__':                               
+      33 +            pcm=(np.clip(audio.samples,-1.0,1.0)*32767).astype(
+         +'<i2').tobytes()                                               
+      34 +            return {'sample_rate':audio.sample_rate,'duration_s
+         +ec':dur,'elapsed_sec':el,'rtf':el/max(dur,1e-6),'pcm_base64':ba
+         +se64.b64encode(pcm).decode('ascii'),'pcm_len':len(pcm)}        
+      35 +        out=Path(output); out.parent.mkdir(parents=True,exist_o
+         +k=True)                                                        
+      36 +        sf.write(str(out),audio.samples,audio.sample_rate)     
+      37          return {'output':str(out),'sample_rate':audio.sample_ra
+          te,'duration_sec':dur,'elapsed_sec':el,'rtf':el/max(dur,1e-6)}
+
+  Thought for 1s (ctrl+o to expand)
+
+● Now add in-memory mode to Piper engine:
+
+  Read 1 file (ctrl+o to expand)
+● Update(app/piper_tts_engine.py)
+  ⎿  Added 2 lines
+      1 +import base64                                                   
+      2 +import io                                                       
+      3  import os
+      4  import subprocess
+      5  import sys
+
+  Thought for 4s, read 1 file (ctrl+o to expand)
+
+● Update(app/piper_tts_engine.py)
+  ⎿  Added 32 lines, removed 6 lines
+      108          if not text:
+      109              raise ValueError("empty text")
+      110  
+      111 -        out = Path(output)                                    
+      112 -        out.parent.mkdir(parents=True, exist_ok=True)         
+      113 -                                                              
+      111          # ── build SynthesisConfig ───────────────────────────
+           ─────────────
+      112          from piper.config import SynthesisConfig  # noqa: E402
+      113  
+     ...
+      129  
+      130          syn_cfg = SynthesisConfig(**syn_cfg_kwargs)
+      131  
+      135 -        # ── synthesize → wav ────────────────────────────────
+          -─────────────                                                 
+      132 +        sr = self._voice.config.sample_rate                   
+      133 +                                                              
+      134 +        # ── in-memory mode: write WAV to BytesIO, no disk ───
+          +──────────                                                    
+      135 +        if output == "__memory__":                            
+      136 +            start = time.time()                               
+      137 +            buf = io.BytesIO()                                
+      138 +            with wave.open(buf, "wb") as wf:                  
+      139 +                wf.setnchannels(1)                            
+      140 +                wf.setsampwidth(2)                            
+      141 +                wf.setframerate(sr)                           
+      142 +                self._voice.synthesize_wav(text, wf, syn_confi
+          +g=syn_cfg)                                                    
+      143 +            pcm = buf.getvalue()                              
+      144 +            elapsed = time.time() - start                     
+      145 +            if len(pcm) == 0:                                 
+      146 +                raise RuntimeError("Piper produced empty wav")
+      147 +            duration = (len(pcm) - 44) / (2 * sr)  # WAV heade
+          +r = 44 bytes                                                  
+      148 +            return {                                          
+      149 +                "sample_rate": int(sr),                       
+      150 +                "duration_sec": duration,                     
+      151 +                "elapsed_sec": elapsed,                       
+      152 +                "rtf": elapsed / max(duration, 1e-6),         
+      153 +                "backend": "piper-persistent",                
+      154 +                "pcm_base64": base64.b64encode(pcm).decode("as
+          +cii"),                                                        
+      155 +                "pcm_len": len(pcm),                          
+      156 +                "pcm_is_wav": True,   # Piper writes WAV, not 
+          +raw PCM                                                       
+      157 +            }                                                 
+      158 +                                                              
+      159 +        # ── file mode (original) ────────────────────────────
+          +────────────                                                  
+      160 +        out = Path(output)                                    
+      161 +        out.parent.mkdir(parents=True, exist_ok=True)         
+      162          start = time.time()
+      163          with wave.open(str(out), "wb") as wf:
+      164              wf.setnchannels(1)
+      139 -            wf.setsampwidth(2)          # 16-bit              
+      140 -            wf.setframerate(self._voice.config.sample_rate)   
+      165 +            wf.setsampwidth(2)                                
+      166 +            wf.setframerate(sr)                               
+      167              self._voice.synthesize_wav(text, wf, syn_config=sy
+           n_cfg)
+      168          elapsed = time.time() - start
+      169  
+
+  Thought for 2s (ctrl+o to expand)
+
+● Now update the pipeline. Modify synth_worker + play_worker to use in-memory
+  PCM:
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 1 line
+      1  #!/usr/bin/env python3
+      2 +import base64                                                   
+      3  import os
+      4  import queue
+      5  import re
+
+  Thought for 6s, read 1 file (ctrl+o to expand)
+
+● Update(~/Qwen/scripts/23_interactive_piper_persistent_qwen.py)
+  ⎿  Added 16 lines, removed 7 lines
+      164              idx, text = item
+      165              log("SYNTH", f"start idx={idx} chars={len(text)} t
+           ext={text}")
+      166              t0 = time.perf_counter()
+      167 -            output = f"/tmp/piper_interactive_{int(time.time()
+          - * 1000)}_{idx}.wav"                                          
+      167              r = requests.post(
+      168                  TTS_API_BASE + "/synthesize",
+      170 -                json={"text": text, "play": False, "output": o
+          -utput},                                                       
+      169 +                json={"text": text, "output": "__memory__"},  
+      170                  timeout=600,
+      171              )
+      172              synth_dt = time.perf_counter() - t0
+      174 -            log("SYNTH", f"done idx={idx} status={r.status_cod
+          -e} elapsed={synth_dt:.3f}s wav={output}")                     
+      173              r.raise_for_status()
+      176 -            play_q.put((idx, output))                         
+      174 +            data = r.json()                                   
+      175 +            pcm = base64.b64decode(data["pcm_base64"])        
+      176 +            log("SYNTH", f"done idx={idx} elapsed={synth_dt:.3
+          +f}s dur={data['duration_sec']:.2f}s rtf={data.get('rtf',0):.2f
+          +}")                                                           
+      177 +            play_q.put((idx, pcm, data["sample_rate"], data.ge
+          +t("pcm_is_wav", False)))                                      
+      178          except Exception as e:
+      179              log("SYNTH-ERROR", repr(e))
+      180          finally:
+     ...
+      187          try:
+      188              if item is STOP:
+      189                  return
+      189 -            idx, output = item                                
+      190 -            log("PLAY", f"start idx={idx} wav={output}")      
+      190 +            idx, pcm, sample_rate, is_wav = item              
+      191 +            log("PLAY", f"start idx={idx} sr={sample_rate}")  
+      192              t1 = time.perf_counter()
+      192 -            play_wav(output)                                  
+      193 +            if is_wav:                                        
+      194 +                # Piper sends complete WAV → pipe directly to 
+          +aplay stdin                                                   
+      195 +                subprocess.run(["aplay", "-q", "-"], input=pcm
+          +, check=True)                                                 
+      196 +            else:                                             
+      197 +                # Sherpa sends raw PCM → tell aplay the format
+      198 +                subprocess.run(                               
+      199 +                    ["aplay", "-q", "-r", str(sample_rate), "-
+          +f", "S16_LE", "-c", "1", "-"],                                
+      200 +                    input=pcm, check=True,                    
+      201 +                )                                             
+      202              play_dt = time.perf_counter() - t1
+      203              log("PLAY", f"done idx={idx} elapsed={play_dt:.3f}
+           s")
+      204          except Exception as e:
+
+  Thought for 1s (ctrl+o to expand)
+
+● 语法检查 + 重启服务测试：
+
+● Bash(cd /home/linaro/Qwen/tts/02_rk3588_sherpa_onnx_tts_deploy_project &&
+      .venv/bin/python -m py_compile app/sherpa_tts_engine.py
+      app/piper_tts_engine.py && echo "se…)
+  ⎿  Error: Exit code 127
+     server OK
+     /bin/bash:行1: 
+     tts/03_rk3588_qwen35_sherpa_onnx_voice_bridge_project/.venv/bin/python: 
+     没有那个文件或目录
+
+  Thought for 4s (ctrl+o to expand)
+
+● Bash(/home/linaro/Qwen/tts/03_rk3588_qwen35_sherpa_onnx_voice_bridge_project/.
+      venv/bin/python -m py_compile
+      /home/linaro/Qwen/scripts/23_interactive_piper_persistent…)
+  ⎿  pipeline OK
+
+  Thought for 1s (ctrl+o to expand)
+
+● 全部语法通过。重启服务验证：
+
+● Bash(cd /home/linaro/Qwen/scripts && bash 08_stop_sherpa_tts.sh 2>&1 && sleep
+      1 && bash 00_start_sherpa_tts.sh)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 2m)
+
+● Bash(echo "=== Health ===" && curl -s http://127.0.0.1:8011/health | python3
+      -m json.tool && echo && echo "=== 测试 in-memory 合成 ===" && curl -s -X
+      POST http://127.0.0…)
+  ⎿  Running in the background (↓ to manage)
+
+  Thought for 4s, read 2 files (ctrl+o to expand)
+
+● Bash(sleep 10 && curl -s http://127.0.0.1:8011/health 2>&1 | head -1)
+  ⎿  Error: Exit code 143
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(fuser 8011/tcp 2>/dev/null && echo "port active" || echo "port free" &&
+      tail -5 /home/linaro/Qwen/tts/logs/sherpa_tts_service.log 2>/dev/null)
+  ⎿  port free
+     INFO:     127.0.0.1:49484 - "POST /synthesize HTTP/1.1" 200 OK
+     INFO:     Shutting down
+     … +3 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(cd /home/linaro/Qwen/scripts && bash 00_start_sherpa_tts.sh)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 2m)
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(for i in $(seq 1 30); do if curl -fsS http://127.0.0.1:8011/health
+      >/dev/null 2>&1; then echo "Service ready after ${i}s"; curl -s
+      http://127.0.0.1:8011/health;…)  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 1m)
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(tail -20 /home/linaro/Qwen/tts/logs/sherpa_tts_service.log 2>/dev/null &&
+       echo "---" && fuser 8011/tcp 2>/dev/null && echo "port in use" || echo
+      "port still fre…)
+  ⎿  /project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:12
+     0 Ignore OOV '*'
+     INFO:     127.0.0.1:40714 - "POST /synthesize HTTP/1.1" 200 OK
+     … +19 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(cd /home/linaro/Qwen/tts/02_rk3588_sherpa_onnx_tts_deploy_project &&
+      .venv/bin/python -c "from app.sherpa_tts_engine import SherpaTtsEngine,
+      config_from_env; pr…)
+  ⎿  import OK
+     piper import OK
+
+  Thought for 2s (ctrl+o to expand)
+
+● 模块导入正常。直接启动服务测试：
+
+● Bash(source config/sherpa_tts.env && cd "$(dirname "$0")" && exec bash
+      scripts/05_start_api.sh 2>&1 &
+      sleep 15 && curl -s http://127.0.0.1:8011/health | python3 -m j…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 30s)
+
+● Bash(sleep 10 && curl -s http://127.0.0.1:8011/health 2>&1 && echo && echo
+      "=== test __memory__ ===" && curl -s -X POST
+      http://127.0.0.1:8011/synthesize -H 'Content-…)
+  ⎿  Error: Exit code 143
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(ps aux | grep -E "(uvicorn|sherpa)" | grep -v grep && echo "---" && curl
+      -s --max-time 3 http://127.0.0.1:8011/health 2>&1 || echo "service not
+      responding")
+  ⎿  root      187785  0.4  0.3 449116 62668 ?        Ssl  14:47   1:09 /ho
+     me/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/.venv/bin/py
+     thon /home/linaro/Qwen/tts/02_rk3588_melotts_rknn2_deploy_project/.ven
+     … +22 lines (ctrl+o to expand)
+
+  Thought for 2s (ctrl+o to expand)
+
+● 多个启动脚本卡住了。清理后直接启动：
+
+● Bash(kill 243021 247393 250578 242981 247391 2>/dev/null; sleep 1; echo
+      "cleaned")
+  ⎿  cleaned
+
+● Background command "Start sherpa TTS service" failed with exit code 144
+
+● Background command "Start service and test in-memory synthesis" failed with exit code 144
+
+● Background command "Restart 8011 service with new in-memory mode" failed with exit code 144
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(nohup .venv/bin/uvicorn app.sherpa_tts_server:app --host 0.0.0.0 --port
+      8011 > /tmp/tts_restart.log 2>&1 &
+      echo "PID=$!")
+  ⎿  PID=252246
+
+● Bash(sleep 5 && curl -s --max-time 3 http://127.0.0.1:8011/health 2>&1 || echo
+       "not yet ready")
+  ⎿  {
+       "ok": true,
+       "backend": "sherpa_vits",
+     … +5 lines (ctrl+o to expand)
+  ⎿  (timeout 20s)
+
+  Thought for 1s (ctrl+o to expand)
+
+● 服务已启动。测试 in-memory 模式：
+
+● Bash(curl -s -X POST http://127.0.0.1:8011/synthesize -H 'Content-Type:
+      application/json' -d '{"text": "你好世界","output": "__memory__"}' |
+      python3 -c "
+      import json, sy…)
+  ⎿  has pcm: True
+     elapsed: 0.728s
+     duration: 0.882s
+     … +3 lines (ctrl+o to expand)
+
+  Thought for 5s (ctrl+o to expand)
+
+● In-memory 管道工作正常。测试验证：
+
+  has pcm: True
+  no output file: True   ← 零磁盘 I/O
+  elapsed: 0.728s        ← 纯推理时间
+
+  改动汇总
+
+  ┌─────────────────────────────────────────┬────────────────────────────────┐
+  │                  文件                   │              改动              │
+  ├─────────────────────────────────────────┼────────────────────────────────┤
+  │                                         │ output="__memory__" 时返回     │
+  │ app/sherpa_tts_engine.py                │ pcm_base64（raw                │
+  │                                         │ PCM），不写文件                │
+  ├─────────────────────────────────────────┼────────────────────────────────┤
+  │                                         │ 同上，用 BytesIO 写入内存      │
+  │ app/piper_tts_engine.py                 │ WAV，返回 pcm_base64 +         │
+  │                                         │ pcm_is_wav=True                │
+  ├─────────────────────────────────────────┼────────────────────────────────┤
+  │                                         │ synth_worker 请求              │
+  │ 23_interactive_piper_persistent_qwen.py │ "__memory__"，play_worker 用   │
+  │                                         │ aplay - 管道直接播放           │
+  └─────────────────────────────────────────┴────────────────────────────────┘
+
+  整个链路现在是：
+
+  Qwen 输出 → split_sentences → POST /synthesize (__memory__)
+    → 引擎内存合成 → 返回 base64 PCM
+    → decode → aplay - (stdin) → 扬声器
+
+  不再写 /tmp/piper_interactive_*.wav 文件。
+
+✻ Brewed for 12m 2s
+
+❯ 这个sherpa和piper的断句逻辑是用的一个吗                                       
+
+  Thought for 4s (ctrl+o to expand)
+
+● 是的，完全同一个。断句逻辑只在 23_interactive_piper_persistent_qwen.py 的
+  split_sentences 函数里，跟后端（Sherpa 还是 Piper）无关：
+
+  # 第 128-137 行
+  def split_sentences(text):
+      ...
+      if ch in "。！？!?；;，：、\n" or len(buf) >= max_chars:
+
+  不管 8011 后面跑的是 Sherpa 还是 Piper，管道都是用这段逻辑把 Qwen
+  输出切成短句，再逐句发 POST /synthesize。切换后端不影响断句行为。
+✻ Crunched for 6s
+
+❯ sherpa可以换音色吗                                                            
+
+  Thought for 3s (ctrl+o to expand)
+
+● Bash(echo "=== 检查 sherpa VITS 模型说话人数量 ===" && .venv/bin/python3 -c "
+      import sherpa_onnx…)
+  ⎿  === 检查 sherpa VITS 模型说话人数量 ===
+     /project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:12
+     0 Ignore OOV '0'
+     … +2 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+
+  Thought for 3s (ctrl+o to expand)
+
+● 当前模型 vits-melo-tts-zh_en 只有 1 个说话人（num_speakers: 1）。改 SHERPA_SID
+   无效。
+
+  不过 sherpa-onnx 官网有多说话人的中文模型可以下载：
+
+● Web Search("sherpa-onnx multi-speaker Chinese VITS TTS model download 2025")
+  ⎿  Did 1 search in 4s
+
+  Thought for 1s (ctrl+o to expand)
+
+● Fetch(https://k2-fsa.github.io/sherpa/onnx/tts/pretrained_models/index.html)
+  ⎿  Received 26.5KB (200 OK)
+
+  Thought for 5s (ctrl+o to expand)
+
+● 当前模型只有 1 个说话人。Sherpa-onnx 有多说话人中文模型：
+
+  ┌──────────────────────┬──────────┬──────────┐
+  │         模型         │ 说话人数 │ 大小估算 │
+  ├──────────────────────┼──────────┼──────────┤
+  │ vits-zh-ll           │ 5 人     │ 较小     │
+  ├──────────────────────┼──────────┼──────────┤
+  │ aishell3             │ 174 人   │ 中       │
+  ├──────────────────────┼──────────┼──────────┤
+  │ vits-zh-hf-fanchen-C │ 187 人   │ 大       │
+  ├──────────────────────┼──────────┼──────────┤
+  │ vits-zh-hf-theresa   │ 804 人   │ 很大     │
+  └──────────────────────┴──────────┴──────────┘
+
+  推荐 5 人版，轻量实用。要我帮你下载 vits-zh-ll 并配置切换吗？
+
+✻ Churned for 50s
+
+❯ vits-zh-ll是什么意思                                                          
+
+  Thought for 2s (ctrl+o to expand)
+
+● Fetch(https://k2-fsa.github.io/sherpa/onnx/tts/pretrained_models/vits.html)
+  ⎿  Received 203.9KB (200 OK)
+
+  Thought for 2s (ctrl+o to expand)
+
+● vits-zh-ll 就是一个 5 说话人的中文 VITS 模型：
+
+  - vits — VITS 架构
+  - zh — 中文
+  - ll — 官方没解释，就是个命名后缀
+
+  具体参数：
+
+  ┌──────────┬──────────────────────────┬──────────────┐
+  │   项目   │ 当前 vits-melo-tts-zh_en │  vits-zh-ll  │
+  ├──────────┼──────────────────────────┼──────────────┤
+  │ 说话人   │ 1                        │ 5（sid 0~4） │
+  ├──────────┼──────────────────────────┼──────────────┤
+  │ 模型大小 │ 162MB                    │ 115MB        │
+  ├──────────┼──────────────────────────┼──────────────┤
+  │ 语言     │ 中+英                    │ 纯中文       │
+  ├──────────┼──────────────────────────┼──────────────┤
+  │ FST 规则 │ 有                       │ 有           │
+  └──────────┴──────────────────────────┴──────────────┘
+
+  模型更小、支持换音色。要下载来用吗？
+
+✻ Baked for 18s
+
+❯ 可以，帮我下载，然后安装适配                                                  
+
+  Thought for 2s (ctrl+o to expand)
+
+● Bash(echo "=== 下载 vits-zh-ll ===" && cd /home/linaro/models && wget -q
+      --show-progress https://github.com/k2-fsa/sherpa-onnx/releases/download/tt
+      s-models/sherpa-onnx…)
+  ⎿  === 下载 vits-zh-ll ===
+
+          0K .......... .......... .......... .......... ..........  0%  43
+     … +426 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to /home/linaro/Qwen
+  ⎿  (timeout 5m)
+
+  Thought for 6s, listed 1 directory (ctrl+o to expand)
+
+● 下载解压完成（116MB）。更新配置：
+
+● Update(config/sherpa_tts.env)
+  ⎿  Added 1 line, removed 1 line
+      1  TTS_ENGINE=sherpa_vits
+      2  
+      3 -SHERPA_MODEL_DIR=/home/linaro/models/vits-melo-tts-zh_en        
+      3 +SHERPA_MODEL_DIR=/home/linaro/models/sherpa-onnx-vits-zh-ll     
+      4  SHERPA_MODEL_URL=https://github.com/k2-fsa/sherpa-onnx/releases/
+         download/tts-models/vits-melo-tts-zh_en.tar.bz2
+      5  SHERPA_VITS_MODEL=model.onnx
+      6  SHERPA_VITS_LEXICON=lexicon.txt
+
+  Thought for 3s (ctrl+o to expand)
+
+● 重启服务：
+
+● Bash(cd /home/linaro/Qwen/tts/02_rk3588_sherpa_onnx_tts_deploy_project && kill
+       $(fuser 8011/tcp 2>/dev/null) 2>/dev/null; sleep 2 && nohup
+      .venv/bin/uvicorn app.sher…)
+  ⎿  {
+         "ok": true,
+         "backend": "sherpa_vits",
+     … +5 lines (ctrl+o to expand)
+  ⎿  (timeout 30s)
+
+  Thought for 2s (ctrl+o to expand)
+
+● 服务已启动。测试换音色：
+
+● Bash(echo "=== 测试 5 个说话人 ===" && for sid in 0 1 2 3 4; do
+        curl -s -X POST http://127.0.0.1:8011/synthesize \…)
+  ⎿  === 测试 5 个说话人 ===
+       sid=0: elapsed=1.040s dur=1.632s rt=0.64
+       sid=1: elapsed=0.706s dur=1.168s rt=0.60
+     … +3 lines (ctrl+o to expand)
+  ⎿  (timeout 1m)
+
+● 5 个说话人全部可用。汇总：
+
+  ┌──────────────┬──────┐
+  │ 说话人 (sid) │ 音色 │
+  ├──────────────┼──────┤
+  │ 0            │ 默认 │
+  ├──────────────┼──────┤
+  │ 1            │ 可选 │
+  ├──────────────┼──────┤
+  │ 2            │ 可选 │
+  ├──────────────┼──────┤
+  │ 3            │ 可选 │
+  ├──────────────┼──────┤
+  │ 4            │ 可选 │
+  └──────────────┴──────┘
+
+  默认用 sid=0。要换音色，命令行指定 SHERPA_SID 即可：
+
+  SHERPA_SID=3 ./23_interactive_piper_persistent_qwen.sh
+
+  或永久改默认：编辑 config/sherpa_tts.env 里的
+  SHERPA_SID。建议你先实际跑交互脚本听一下每个音色，看喜欢哪个。
+✻ Sautéed for 1m 37s
