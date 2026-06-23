@@ -1,4 +1,68 @@
-INFO:     Started server process [7]
+INFO:     Started server process [4166]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8011 (Press CTRL+C to quit)
+INFO:     127.0.0.1:58070 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56700 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56702 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56714 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42202 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42208 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44872 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44880 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44896 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39878 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39892 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39298 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34650 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34658 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34672 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44102 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44110 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44124 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39594 - "POST /synthesize HTTP/1.1" 200 OK
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '“'
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '”'
+INFO:     127.0.0.1:39598 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39614 - "POST /synthesize HTTP/1.1" 200 OK
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '“'
+INFO:     127.0.0.1:39626 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56224 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56234 - "POST /synthesize HTTP/1.1" 200 OK
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '”'
+INFO:     127.0.0.1:56246 - "POST /synthesize HTTP/1.1" 200 OK
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '—'
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '—'
+INFO:     127.0.0.1:56260 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56272 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54620 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54626 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54636 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54642 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54650 - "POST /synthesize HTTP/1.1" 200 OK
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '“'
+INFO:     127.0.0.1:53846 - "POST /synthesize HTTP/1.1" 200 OK
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '”'
+INFO:     127.0.0.1:53862 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53866 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53878 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53882 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53884 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53888 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55290 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55294 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55300 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55304 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55318 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55324 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55340 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55356 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36834 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36850 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36852 - "POST /synthesize HTTP/1.1" 200 OK
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '“'
+/project/sherpa-onnx/csrc/melo-tts-lexicon.cc:ConvertTextToTokenIds:120 Ignore OOV '”'
+INFO:     127.0.0.1:36854 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36864 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36880 - "POST /synthesize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36894 - "POST /synthesize HTTP/1.1" 200 OK

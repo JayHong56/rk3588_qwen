@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from app.sherpa_tts_engine import SherpaTtsEngine, config_from_env
-from app.piper_tts_engine import PiperTtsEngine, piper_config_from_env
+from app.piper_tts_engine import create_piper_engine, piper_config_from_env
 from app.audio_player import play_audio
 
 def load_env(path):
@@ -21,12 +21,12 @@ def create_engine():
     if backend in {'sherpa', 'sherpa_vits', 'vits'}:
         return backend, SherpaTtsEngine(config_from_env())
     if backend == 'piper':
-        return backend, PiperTtsEngine(piper_config_from_env())
+        return backend, create_piper_engine(piper_config_from_env())
     raise RuntimeError(f'unsupported TTS_ENGINE={backend}')
 
 backend_name, engine = create_engine()
 
-class Req(BaseModel): text:str; output:Optional[str]=None; sid:Optional[int]=None; speed:Optional[float]=None; play:bool=False
+class Req(BaseModel): text:str; output:Optional[str]=None; sid:Optional[int]=None; speed:Optional[float]=None; volume:Optional[float]=None; play:bool=False
 @app.get('/health')
 def health():
     return {
@@ -38,12 +38,12 @@ def health():
     }
 @app.post('/synthesize')
 def synth(req:Req):
-    try: return engine.synthesize(req.text, req.output or str(Path(os.environ.get('OUTPUT_DIR','output'))/f'tts_{int(time.time()*1000)}.wav'), req.sid, req.speed)
+    try: return engine.synthesize(req.text, req.output or str(Path(os.environ.get('OUTPUT_DIR','output'))/f'tts_{int(time.time()*1000)}.wav'), req.sid, req.speed, req.volume)
     except Exception as e: raise HTTPException(status_code=500, detail=str(e))
 @app.post('/speak')
 def speak(req:Req):
     try:
-        r=engine.synthesize(req.text, req.output or str(Path(os.environ.get('OUTPUT_DIR','output'))/f'tts_{int(time.time()*1000)}.wav'), req.sid, req.speed)
+        r=engine.synthesize(req.text, req.output or str(Path(os.environ.get('OUTPUT_DIR','output'))/f'tts_{int(time.time()*1000)}.wav'), req.sid, req.speed, req.volume)
         if req.play: play_audio(r['output'])
         r['played']=req.play; return r
     except Exception as e: raise HTTPException(status_code=500, detail=str(e))
