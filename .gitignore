@@ -3,9 +3,11 @@
 *.rknn
 *.rkllm
 *.tar.gz
+*.tar.bz2
 *.zip
 *.whl
 *.so
+*.npz
 *.wav
 
 # ===== Downloaded assets / models =====
@@ -14,6 +16,12 @@ tts/models/
 tts/piper_data/
 tts/piper_fast_frontend/
 tts/torch_only_site/
+
+# ===== Virtual environments =====
+.venv/
+venv/
+__pycache__/
+*.pyc
 
 # ===== Generated audio recordings =====
 tts/recorded_timeline_runs/
